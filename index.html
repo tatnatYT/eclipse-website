@@ -14,8 +14,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="anim.css">
 </head>
 <body>
+  <!-- Intro: a shadow slides over the glowing moon (an eclipse), then the page appears. -->
+  <div class="intro" id="intro" aria-hidden="true">
+    <div class="intro-moon"><img src="assets/logo.png" alt=""></div>
+    <div class="intro-shadow"></div>
+    <div class="intro-ring"></div>
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="cursor-glow" id="cursorGlow"></div>
+  <div class="cubes" id="cubes" aria-hidden="true"></div>
   <header class="nav" id="nav">
     <a class="brand" href="#top">
       <img src="assets/logo.png" alt="" width="36" height="36">
@@ -37,15 +47,18 @@
       <div class="hero-stars" id="heroStars"></div>
       <div class="hero-shade"></div>
       <div class="hero-content">
-        <img class="hero-logo" src="assets/logo.png" alt="Eclipse Client logo" width="128" height="128">
-        <h1 class="wordmark big">ECLIPSE<small>CLIENT</small></h1>
+        <div class="logo-wrap" id="logoWrap">
+          <div class="orbit"><i></i><i></i><i></i></div>
+          <div class="orbit o2"><i></i><i></i></div>
+          <img class="hero-logo" src="assets/logo.png" alt="Eclipse Client logo" width="128" height="128">
+        </div>
+        <h1 class="wordmark big" id="heroWord"><span class="letters">ECLIPSE</span><small>CLIENT</small></h1>
         <p class="tagline">The free Minecraft client for every version, from 1.8.9 to 26.3.</p>
         <div class="hero-buttons">
           <a class="btn btn-big download-link" href="https://github.com/tatnatYT/tatnat-launcher/releases/latest">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>
             <span>Download for Windows</span>
           </a>
-          <a class="btn btn-ghost" href="https://github.com/tatnatYT/tatnat-launcher" target="_blank" rel="noopener">View on GitHub</a>
         </div>
         <p class="hero-meta"><span id="heroVersion">Latest version</span> · Windows 10 &amp; 11 · Free · Updates itself</p>
       </div>
@@ -60,9 +73,9 @@
     <!-- ================= stats ================= -->
     <section class="stats reveal">
       <div><b>1.8.9 – 26.3</b><span>Every version</span></div>
-      <div><b>80</b><span>Built-in mods</span></div>
-      <div><b>Up to 3×</b><span>FPS behind walls</span></div>
-      <div><b>5</b><span>Mod loaders</span></div>
+      <div><b data-count="80">80</b><span>Built-in mods</span></div>
+      <div><b data-count="3" data-prefix="Up to " data-suffix="×">Up to 3×</b><span>FPS behind walls</span></div>
+      <div><b data-count="5">5</b><span>Mod loaders</span></div>
     </section>
 
     <!-- ================= features ================= -->
@@ -115,17 +128,20 @@
         <button class="tab" data-shot="3" role="tab">Skins</button>
         <button class="tab" data-shot="4" role="tab">Mods</button>
       </div>
-      <figure class="frame reveal">
+      <div class="frame-wrap">
+      <figure class="frame reveal" id="frame">
         <img id="shot" src="assets/shots/launcher-play.png" alt="The Eclipse Launcher" loading="lazy">
         <figcaption id="shotCaption">The launcher: your background, the version and loader picker, and Flappy Bird with your own head while you wait.</figcaption>
       </figure>
+      </div>
     </section>
 
     <!-- ================= install ================= -->
     <section class="section" id="install">
       <p class="eyebrow">Install</p>
       <h2>Playing in three steps</h2>
-      <ol class="steps">
+      <ol class="steps" id="steps">
+        <svg class="steps-line" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 100 2"><line x1="0" y1="1" x2="100" y2="1"/></svg>
         <li class="reveal"><span>1</span><div><h3>Download</h3><p>Get <b>Eclipse-Launcher-Setup.exe</b> from the button above. There's also a portable version on GitHub that needs no install.</p></div></li>
         <li class="reveal"><span>2</span><div><h3>Sign in</h3><p>Open the launcher and sign in with the Microsoft account that owns Minecraft: Java Edition.</p></div></li>
         <li class="reveal"><span>3</span><div><h3>Play</h3><p>Pick a version and a loader and press Play. Eclipse Client is added for you; press Right Shift in game for the mod menu.</p></div></li>

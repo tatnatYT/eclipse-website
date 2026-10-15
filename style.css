@@ -220,7 +220,4 @@ h3 { margin: 0 0 8px; font-size: 18px; }
   .hero-switch { right: 50%; translate: 50% 0; bottom: 70px; }
   .cta { margin: 90px 16px 0; }
 }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
-  .reveal { opacity: 1; transform: none; }
-}
+
