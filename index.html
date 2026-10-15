@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Eclipse Client</title>
+  <meta name="description" content="Eclipse Client: a free Minecraft launcher and client for every version from 1.8.9 to 26.3. 80 built-in mods, an FPS boost, Modrinth mods, shaders and texture packs, skins and more.">
+  <meta property="og:title" content="Eclipse Client">
+  <meta property="og:description" content="A free Minecraft launcher and client for every version, 1.8.9 to 26.3.">
+  <meta property="og:image" content="assets/shots/launcher-play.png">
+  <meta name="theme-color" content="#0f0e13">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="nav" id="nav">
+    <a class="brand" href="#top">
+      <img src="assets/logo.png" alt="" width="36" height="36">
+      <span class="wordmark">ECLIPSE<small>CLIENT</small></span>
+    </a>
+    <nav class="links">
+      <a href="#features">Features</a>
+      <a href="#showcase">Showcase</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-small download-link" href="https://github.com/tatnatYT/tatnat-launcher/releases/latest">Download</a>
+  </header>
+
+  <main id="top">
+    <!-- ================= hero ================= -->
+    <section class="hero">
+      <div class="hero-bg" id="heroBg"></div>
+      <div class="hero-stars" id="heroStars"></div>
+      <div class="hero-shade"></div>
+      <div class="hero-content">
+        <img class="hero-logo" src="assets/logo.png" alt="Eclipse Client logo" width="128" height="128">
+        <h1 class="wordmark big">ECLIPSE<small>CLIENT</small></h1>
+        <p class="tagline">The free Minecraft client for every version, from 1.8.9 to 26.3.</p>
+        <div class="hero-buttons">
+          <a class="btn btn-big download-link" href="https://github.com/tatnatYT/tatnat-launcher/releases/latest">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>
+            <span>Download for Windows</span>
+          </a>
+          <a class="btn btn-ghost" href="https://github.com/tatnatYT/tatnat-launcher" target="_blank" rel="noopener">View on GitHub</a>
+        </div>
+        <p class="hero-meta"><span id="heroVersion">Latest version</span> · Windows 10 &amp; 11 · Free · Updates itself</p>
+      </div>
+      <div class="hero-switch" aria-label="Background">
+        <button class="hero-arrow" id="bgPrev" aria-label="Previous background"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="hero-dots" id="bgDots"></div>
+        <button class="hero-arrow" id="bgNext" aria-label="Next background"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      </div>
+      <a class="scroll-hint" href="#features" aria-label="Scroll down"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></a>
+    </section>
+
+    <!-- ================= stats ================= -->
+    <section class="stats reveal">
+      <div><b>1.8.9 – 26.3</b><span>Every version</span></div>
+      <div><b>80</b><span>Built-in mods</span></div>
+      <div><b>Up to 3×</b><span>FPS behind walls</span></div>
+      <div><b>5</b><span>Mod loaders</span></div>
+    </section>
+
+    <!-- ================= features ================= -->
+    <section class="section" id="features">
+      <p class="eyebrow">Features</p>
+      <h2>Everything in one launcher</h2>
+      <p class="lead">Sign in once, pick a version and play. Eclipse sets up the loader, the mods and the settings for you.</p>
+      <div class="cards">
+        <article class="card reveal">
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9"/></svg></div>
+          <h3>Every version, one click</h3>
+          <p>Vanilla, Fabric, Forge and NeoForge for every Minecraft release, snapshot and old beta. The launcher downloads and installs everything itself.</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+          <h3>80 built-in mods</h3>
+          <p>Keystrokes, CPS, FPS and armor HUDs, zoom, freecam, Tier Tagger, totem pop counter, waypoints and many more. Press Right Shift in game, or change the key.</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
+          <h3>More FPS</h3>
+          <p>Built-in culling skips mobs, chests and signs hidden behind walls. One click on FPS Boost adds Sodium, Lithium, FerriteCore and friends with tuned settings.</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="2.5"/></svg></div>
+          <h3>Mods, packs and shaders</h3>
+          <p>Search Modrinth for mods, texture packs and shaders. See when updates are out, switch versions, and import Modrinth or CurseForge modpacks.</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M8 3l-5 3 2 4 2-1v12h10V9l2 1 2-4-5-3c0 2-2 3-4 3S8 5 8 3z"/></svg></div>
+          <h3>Skins and capes</h3>
+          <p>A live 3D preview with your real name tag. Upload skins, keep a library, try Minecraft's default skins and switch capes before you play.</p>
+        </article>
+        <article class="card reveal">
+          <div class="icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 4.5a3.5 3.5 0 010 7M21 20c0-2.8-1.6-5-4-5.7"/></svg></div>
+          <h3>Accounts that switch in game</h3>
+          <p>Microsoft and offline accounts, and switch between them from the in-game menu without restarting Minecraft.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ================= showcase ================= -->
+    <section class="section showcase" id="showcase">
+      <p class="eyebrow">Showcase</p>
+      <h2>See it in action</h2>
+      <div class="tabs" role="tablist">
+        <button class="tab on" data-shot="0" role="tab">Launcher</button>
+        <button class="tab" data-shot="1" role="tab">Main menu</button>
+        <button class="tab" data-shot="2" role="tab">Mod menu</button>
+        <button class="tab" data-shot="3" role="tab">Skins</button>
+        <button class="tab" data-shot="4" role="tab">Mods</button>
+      </div>
+      <figure class="frame reveal">
+        <img id="shot" src="assets/shots/launcher-play.png" alt="The Eclipse Launcher" loading="lazy">
+        <figcaption id="shotCaption">The launcher: your background, the version and loader picker, and Flappy Bird with your own head while you wait.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ================= install ================= -->
+    <section class="section" id="install">
+      <p class="eyebrow">Install</p>
+      <h2>Playing in three steps</h2>
+      <ol class="steps">
+        <li class="reveal"><span>1</span><div><h3>Download</h3><p>Get <b>Eclipse-Launcher-Setup.exe</b> from the button above. There's also a portable version on GitHub that needs no install.</p></div></li>
+        <li class="reveal"><span>2</span><div><h3>Sign in</h3><p>Open the launcher and sign in with the Microsoft account that owns Minecraft: Java Edition.</p></div></li>
+        <li class="reveal"><span>3</span><div><h3>Play</h3><p>Pick a version and a loader and press Play. Eclipse Client is added for you; press Right Shift in game for the mod menu.</p></div></li>
+      </ol>
+      <p class="note">Windows may warn about an unknown app the first time (the installer isn't code-signed yet): click <b>More info → Run anyway</b>.</p>
+    </section>
+
+    <!-- ================= faq ================= -->
+    <section class="section" id="faq">
+      <p class="eyebrow">FAQ</p>
+      <h2>Questions</h2>
+      <div class="faq">
+        <details class="reveal"><summary>Is it free?</summary><p>Yes. The launcher and the client are completely free, and the source is on GitHub.</p></details>
+        <details class="reveal"><summary>Which versions does it support?</summary><p>The launcher runs every Minecraft version. Eclipse Client (the in-game mods) works on Fabric 1.8.9–1.12.2 and 1.14.4–26.3, Forge 1.8.9–1.12.2 and 1.18.2–1.20.1, and NeoForge 1.20.2–26.3.</p></details>
+        <details class="reveal"><summary>Can I use my own mods and modpacks?</summary><p>Yes. Drop in your own jars, install from Modrinth, or import a Modrinth (.mrpack) or CurseForge modpack. Eclipse Client works next to Sodium, Iris, Lithium and other popular mods.</p></details>
+        <details class="reveal"><summary>Can I use it on servers?</summary><p>Eclipse Client only changes what you see and your HUD; it adds no cheats. Still, every server has its own rules, so check them if you're unsure.</p></details>
+        <details class="reveal"><summary>How do updates work?</summary><p>The launcher updates itself from GitHub and brings the newest Eclipse Client with it. There's nothing to download again.</p></details>
+      </div>
+    </section>
+
+    <!-- ================= final call ================= -->
+    <section class="cta reveal">
+      <h2>Ready to play?</h2>
+      <a class="btn btn-big download-link" href="https://github.com/tatnatYT/tatnat-launcher/releases/latest">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>
+        <span>Download Eclipse</span>
+      </a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-brand">
+      <img src="assets/logo.png" alt="" width="28" height="28">
+      <span>Eclipse Client · made by tatnat</span>
+    </div>
+    <div class="footer-links">
+      <a href="https://www.youtube.com/@tatnatmc" target="_blank" rel="noopener">YouTube</a>
+      <a href="https://github.com/tatnatYT/tatnat-launcher" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/tatnatYT/tatnat-launcher/releases" target="_blank" rel="noopener">All releases</a>
+    </div>
+    <p class="legal">Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</p>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
