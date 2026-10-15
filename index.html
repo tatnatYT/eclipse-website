@@ -8,13 +8,12 @@
   <meta property="og:title" content="Eclipse Client">
   <meta property="og:description" content="A free Minecraft launcher and client for every version, 1.8.9 to 26.3.">
   <meta property="og:image" content="assets/shots/launcher-play.png">
-  <meta name="theme-color" content="#0f0e13">
+  <meta name="theme-color" content="#0b0a10">
   <link rel="icon" href="assets/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="anim.css">
 </head>
 <body>
   <!-- Intro: a shadow slides over the glowing moon (an eclipse), then the page appears. -->
@@ -22,136 +21,212 @@
     <div class="intro-moon"><img src="assets/logo.png" alt=""></div>
     <div class="intro-shadow"></div>
     <div class="intro-ring"></div>
+    <div class="intro-word">ECLIPSE</div>
   </div>
+
   <div class="progress" id="progress"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
   <div class="cursor-glow" id="cursorGlow"></div>
+  <div class="grain" aria-hidden="true"></div>
   <div class="cubes" id="cubes" aria-hidden="true"></div>
+
   <header class="nav" id="nav">
     <a class="brand" href="#top">
-      <img src="assets/logo.png" alt="" width="36" height="36">
+      <img src="assets/logo.png" alt="" width="34" height="34">
       <span class="wordmark">ECLIPSE<small>CLIENT</small></span>
     </a>
-    <nav class="links">
+    <nav class="links" id="links">
+      <span class="links-pill" id="linksPill"></span>
       <a href="#features">Features</a>
+      <a href="#fps">Performance</a>
       <a href="#showcase">Showcase</a>
       <a href="#install">Install</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a class="btn btn-small download-link" href="https://github.com/tatnatYT/tatnat-launcher/releases/latest">Download</a>
+    <a class="btn btn-small magnetic download-link" href="https://github.com/tatnatYT/tatnat-launcher/releases/latest"><span>Download</span></a>
   </header>
 
   <main id="top">
     <!-- ================= hero ================= -->
-    <section class="hero">
+    <section class="hero" id="hero">
       <div class="hero-bg" id="heroBg"></div>
-      <div class="hero-stars" id="heroStars"></div>
+      <canvas class="hero-stars" id="starfield"></canvas>
+      <div class="aurora"><i></i><i></i><i></i></div>
       <div class="hero-shade"></div>
       <div class="hero-content">
-        <div class="logo-wrap" id="logoWrap">
+        <p class="badge"><span class="dot"></span><span id="heroVersion">Latest version</span> is out</p>
+        <div class="logo-wrap">
           <div class="orbit"><i></i><i></i><i></i></div>
           <div class="orbit o2"><i></i><i></i></div>
-          <img class="hero-logo" src="assets/logo.png" alt="Eclipse Client logo" width="128" height="128">
+          <div class="logo-halo"></div>
+          <img class="hero-logo" src="assets/logo.png" alt="Eclipse Client logo" width="140" height="140">
         </div>
-        <h1 class="wordmark big" id="heroWord"><span class="letters">ECLIPSE</span><small>CLIENT</small></h1>
-        <p class="tagline">The free Minecraft client for every version, from 1.8.9 to 26.3.</p>
+        <h1 class="wordmark big"><span class="letters">ECLIPSE</span><small>CLIENT</small></h1>
+        <p class="tagline">The free Minecraft client for <span class="hl">every version</span>, from 1.8.9 to 26.3.<br>80 mods, a big FPS boost and a launcher that does everything for you.</p>
         <div class="hero-buttons">
-          <a class="btn btn-big download-link" href="https://github.com/tatnatYT/tatnat-launcher/releases/latest">
+          <a class="btn btn-big magnetic download-link" href="https://github.com/tatnatYT/tatnat-launcher/releases/latest">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>
             <span>Download for Windows</span>
           </a>
         </div>
-        <p class="hero-meta"><span id="heroVersion">Latest version</span> · Windows 10 &amp; 11 · Free · Updates itself</p>
+        <p class="hero-meta">Windows 10 &amp; 11 · Free forever · Updates itself</p>
       </div>
       <div class="hero-switch" aria-label="Background">
         <button class="hero-arrow" id="bgPrev" aria-label="Previous background"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
         <div class="hero-dots" id="bgDots"></div>
         <button class="hero-arrow" id="bgNext" aria-label="Next background"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
-      <a class="scroll-hint" href="#features" aria-label="Scroll down"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></a>
+      <a class="scroll-hint" href="#features" aria-label="Scroll down"><span></span></a>
     </section>
 
-    <!-- ================= stats ================= -->
-    <section class="stats reveal">
-      <div><b>1.8.9 – 26.3</b><span>Every version</span></div>
-      <div><b data-count="80">80</b><span>Built-in mods</span></div>
-      <div><b data-count="3" data-prefix="Up to " data-suffix="×">Up to 3×</b><span>FPS behind walls</span></div>
-      <div><b data-count="5">5</b><span>Mod loaders</span></div>
-    </section>
+    <!-- ================= marquee of mods ================= -->
+    <div class="marquee" aria-hidden="true">
+      <div class="marquee-row" id="marqueeA"></div>
+      <div class="marquee-row reverse" id="marqueeB"></div>
+    </div>
 
-    <!-- ================= features ================= -->
+    <!-- ================= features (bento) ================= -->
     <section class="section" id="features">
-      <p class="eyebrow">Features</p>
+      <p class="eyebrow scramble">// FEATURES</p>
       <h2>Everything in one launcher</h2>
       <p class="lead">Sign in once, pick a version and play. Eclipse sets up the loader, the mods and the settings for you.</p>
-      <div class="cards">
-        <article class="card reveal">
-          <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9"/></svg></div>
-          <h3>Every version, one click</h3>
-          <p>Vanilla, Fabric, Forge and NeoForge for every Minecraft release, snapshot and old beta. The launcher downloads and installs everything itself.</p>
+
+      <div class="bento">
+        <article class="tile t-fps reveal">
+          <div class="tile-head"><span class="chip">FPS BOOST</span></div>
+          <div class="fps-big"><span id="fpsNum">274</span><small>FPS</small></div>
+          <canvas class="fps-graph" id="fpsGraph"></canvas>
+          <h3>Built-in culling, up to 3× faster</h3>
+          <p>Mobs, chests and signs hidden behind walls simply aren't drawn. Add FPS Boost for Sodium, Lithium and friends in one click.</p>
         </article>
-        <article class="card reveal">
-          <div class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
-          <h3>80 built-in mods</h3>
-          <p>Keystrokes, CPS, FPS and armor HUDs, zoom, freecam, Tier Tagger, totem pop counter, waypoints and many more. Press Right Shift in game, or change the key.</p>
+
+        <article class="tile t-keys reveal">
+          <div class="keys" id="keys">
+            <div class="key k-w" data-k="w">W</div>
+            <div class="key k-a" data-k="a">A</div><div class="key k-s" data-k="s">S</div><div class="key k-d" data-k="d">D</div>
+            <div class="key k-l" data-k="l">LMB<small id="cpsL">0 CPS</small></div><div class="key k-r" data-k="r">RMB<small>0 CPS</small></div>
+          </div>
+          <div>
+            <span class="chip">80 MODS</span>
+            <h3>A mod menu that feels like home</h3>
+            <p>Keystrokes, CPS, zoom, freecam, Tier Tagger, totem counters and 70+ more. Right Shift opens it, or pick your own key.</p>
+          </div>
         </article>
-        <article class="card reveal">
-          <div class="icon"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
-          <h3>More FPS</h3>
-          <p>Built-in culling skips mobs, chests and signs hidden behind walls. One click on FPS Boost adds Sodium, Lithium, FerriteCore and friends with tuned settings.</p>
+
+        <article class="tile t-versions reveal">
+          <span class="chip">EVERY VERSION</span>
+          <div class="ticker"><div class="ticker-track" id="ticker"></div></div>
+          <p>Vanilla, Fabric, Forge and NeoForge. Releases, snapshots and old betas.</p>
         </article>
-        <article class="card reveal">
-          <div class="icon"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/><circle cx="18" cy="17" r="2.5"/></svg></div>
-          <h3>Mods, packs and shaders</h3>
-          <p>Search Modrinth for mods, texture packs and shaders. See when updates are out, switch versions, and import Modrinth or CurseForge modpacks.</p>
+
+        <article class="tile t-head reveal">
+          <span class="chip">SKINS</span>
+          <div class="head-stage">
+            <div class="mc-head" id="mcHead">
+              <i class="f front"></i><i class="f back"></i><i class="f left"></i><i class="f right"></i><i class="f top"></i><i class="f bottom"></i>
+            </div>
+            <div class="head-shadow"></div>
+          </div>
+          <p>Live 3D preview with your real name tag. Upload skins and switch capes.</p>
         </article>
-        <article class="card reveal">
-          <div class="icon"><svg viewBox="0 0 24 24"><path d="M8 3l-5 3 2 4 2-1v12h10V9l2 1 2-4-5-3c0 2-2 3-4 3S8 5 8 3z"/></svg></div>
-          <h3>Skins and capes</h3>
-          <p>A live 3D preview with your real name tag. Upload skins, keep a library, try Minecraft's default skins and switch capes before you play.</p>
+
+        <article class="tile t-mods reveal">
+          <span class="chip">MODRINTH</span>
+          <h3>Mods, packs and shaders, kept up to date</h3>
+          <div class="modrows" id="modrows">
+            <div class="modrow"><b>Sodium</b><span class="ver">0.8.13</span><span class="upd">↓</span><i class="bar"></i></div>
+            <div class="modrow"><b>Iris Shaders</b><span class="ver">1.8.7</span><span class="upd">↓</span><i class="bar"></i></div>
+            <div class="modrow"><b>Complementary</b><span class="ver">r5.9.1</span><span class="upd">↓</span><i class="bar"></i></div>
+          </div>
+          <p>See when updates are out, update with one click or switch to any version. Imports Modrinth and CurseForge modpacks too.</p>
         </article>
-        <article class="card reveal">
-          <div class="icon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 4.5a3.5 3.5 0 010 7M21 20c0-2.8-1.6-5-4-5.7"/></svg></div>
-          <h3>Accounts that switch in game</h3>
-          <p>Microsoft and offline accounts, and switch between them from the in-game menu without restarting Minecraft.</p>
+
+        <article class="tile t-accounts reveal">
+          <span class="chip">ACCOUNTS</span>
+          <div class="accounts" id="accounts">
+            <div class="acc on"><span class="av">T</span><b>tatnat</b><em>IN USE</em></div>
+            <div class="acc"><span class="av alt">E</span><b>EclipseAlt</b><em>SWITCH</em></div>
+          </div>
+          <p>Microsoft and offline accounts. Switch between them in game, no restart needed.</p>
         </article>
       </div>
     </section>
 
-    <!-- ================= showcase ================= -->
-    <section class="section showcase" id="showcase">
-      <p class="eyebrow">Showcase</p>
-      <h2>See it in action</h2>
-      <div class="tabs" role="tablist">
-        <button class="tab on" data-shot="0" role="tab">Launcher</button>
-        <button class="tab" data-shot="1" role="tab">Main menu</button>
-        <button class="tab" data-shot="2" role="tab">Mod menu</button>
-        <button class="tab" data-shot="3" role="tab">Skins</button>
-        <button class="tab" data-shot="4" role="tab">Mods</button>
+    <!-- ================= performance ================= -->
+    <section class="section fps-section" id="fps">
+      <p class="eyebrow scramble">// PERFORMANCE</p>
+      <h2>Frames you can feel</h2>
+      <p class="lead">300 mobs and 40 chests behind a wall, Minecraft 1.21.11. Same PC, same view, Eclipse's culling switched on and off.</p>
+      <div class="compare reveal" id="compare">
+        <div class="cmp">
+          <div class="cmp-label"><span>Without Eclipse</span><b data-to="274">0</b></div>
+          <div class="cmp-bar"><i style="--w: 30%"></i></div>
+        </div>
+        <div class="cmp win">
+          <div class="cmp-label"><span>With Eclipse</span><b data-to="909">0</b></div>
+          <div class="cmp-bar"><i style="--w: 100%"></i></div>
+        </div>
+        <p class="cmp-note">Works next to Sodium, Iris, Lithium, ImmediatelyFast and FerriteCore, and steps aside automatically if you use the EntityCulling mod.</p>
       </div>
-      <div class="frame-wrap">
-      <figure class="frame reveal" id="frame">
-        <img id="shot" src="assets/shots/launcher-play.png" alt="The Eclipse Launcher" loading="lazy">
-        <figcaption id="shotCaption">The launcher: your background, the version and loader picker, and Flappy Bird with your own head while you wait.</figcaption>
-      </figure>
+    </section>
+
+    <!-- ================= showcase (sticky scrollytelling) ================= -->
+    <section class="section showcase" id="showcase">
+      <p class="eyebrow scramble">// SHOWCASE</p>
+      <h2>See it in action</h2>
+      <div class="story">
+        <div class="story-steps" id="storySteps">
+          <div class="story-step on" data-shot="0">
+            <span class="num">01</span><h3>The launcher</h3>
+            <p>Your background, every version and loader, and Flappy Bird with your own head while the game loads.</p>
+          </div>
+          <div class="story-step" data-shot="1">
+            <span class="num">02</span><h3>The main menu</h3>
+            <p>Minecraft's title screen, replaced by the same night skies with your own buttons.</p>
+          </div>
+          <div class="story-step" data-shot="2">
+            <span class="num">03</span><h3>The mod menu</h3>
+            <p>Right Shift opens 80 mods to switch on, set up and drag around with the HUD editor.</p>
+          </div>
+          <div class="story-step" data-shot="3">
+            <span class="num">04</span><h3>Skins and capes</h3>
+            <p>A live 3D preview with the real Minecraft name tag before you put a skin on.</p>
+          </div>
+          <div class="story-step" data-shot="4">
+            <span class="num">05</span><h3>Everything installed</h3>
+            <p>Mods, texture packs and shaders in one list, each with an update arrow and a version switcher.</p>
+          </div>
+        </div>
+        <div class="story-stage">
+          <figure class="window" id="window">
+            <div class="window-bar"><i></i><i></i><i></i><span id="windowTitle">Eclipse Launcher</span></div>
+            <div class="window-body">
+              <img class="shot on" src="assets/shots/launcher-play.png" alt="The Eclipse launcher">
+              <img class="shot" src="assets/shots/game-main-menu.png" alt="The Eclipse main menu in Minecraft" loading="lazy">
+              <img class="shot" src="assets/shots/game-mod-menu.png" alt="The Eclipse mod menu" loading="lazy">
+              <img class="shot" src="assets/shots/launcher-skins.png" alt="The skins page" loading="lazy">
+              <img class="shot" src="assets/shots/launcher-mods.png" alt="Installed mods, packs and shaders" loading="lazy">
+            </div>
+          </figure>
+        </div>
       </div>
     </section>
 
     <!-- ================= install ================= -->
     <section class="section" id="install">
-      <p class="eyebrow">Install</p>
+      <p class="eyebrow scramble">// INSTALL</p>
       <h2>Playing in three steps</h2>
       <ol class="steps" id="steps">
-        <svg class="steps-line" aria-hidden="true" preserveAspectRatio="none" viewBox="0 0 100 2"><line x1="0" y1="1" x2="100" y2="1"/></svg>
-        <li class="reveal"><span>1</span><div><h3>Download</h3><p>Get <b>Eclipse-Launcher-Setup.exe</b> from the button above. There's also a portable version on GitHub that needs no install.</p></div></li>
+        <li class="reveal"><span>1</span><div><h3>Download</h3><p>Get <b>Eclipse-Launcher-Setup.exe</b> with the button. A portable version that needs no install is on GitHub too.</p></div></li>
         <li class="reveal"><span>2</span><div><h3>Sign in</h3><p>Open the launcher and sign in with the Microsoft account that owns Minecraft: Java Edition.</p></div></li>
-        <li class="reveal"><span>3</span><div><h3>Play</h3><p>Pick a version and a loader and press Play. Eclipse Client is added for you; press Right Shift in game for the mod menu.</p></div></li>
+        <li class="reveal"><span>3</span><div><h3>Play</h3><p>Pick a version and a loader and press Play. Eclipse Client is added for you; Right Shift opens the mod menu.</p></div></li>
       </ol>
       <p class="note">Windows may warn about an unknown app the first time (the installer isn't code-signed yet): click <b>More info → Run anyway</b>.</p>
     </section>
 
     <!-- ================= faq ================= -->
     <section class="section" id="faq">
-      <p class="eyebrow">FAQ</p>
+      <p class="eyebrow scramble">// FAQ</p>
       <h2>Questions</h2>
       <div class="faq">
         <details class="reveal"><summary>Is it free?</summary><p>Yes. The launcher and the client are completely free, and the source is on GitHub.</p></details>
@@ -164,8 +239,10 @@
 
     <!-- ================= final call ================= -->
     <section class="cta reveal">
+      <div class="cta-stars" id="ctaStars"></div>
       <h2>Ready to play?</h2>
-      <a class="btn btn-big download-link" href="https://github.com/tatnatYT/tatnat-launcher/releases/latest">
+      <p>Free, every version, and set up in a minute.</p>
+      <a class="btn btn-big magnetic download-link" href="https://github.com/tatnatYT/tatnat-launcher/releases/latest">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>
         <span>Download Eclipse</span>
       </a>
@@ -173,14 +250,16 @@
   </main>
 
   <footer class="footer">
-    <div class="footer-brand">
-      <img src="assets/logo.png" alt="" width="28" height="28">
-      <span>Eclipse Client · made by tatnat</span>
-    </div>
-    <div class="footer-links">
-      <a href="https://www.youtube.com/@tatnatmc" target="_blank" rel="noopener">YouTube</a>
-      <a href="https://github.com/tatnatYT/tatnat-launcher" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://github.com/tatnatYT/tatnat-launcher/releases" target="_blank" rel="noopener">All releases</a>
+    <div class="giant" aria-hidden="true">ECLIPSE</div>
+    <div class="footer-row">
+      <div class="footer-brand">
+        <img src="assets/logo.png" alt="" width="28" height="28">
+        <span>Eclipse Client · made by tatnat</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://www.youtube.com/@tatnatmc" target="_blank" rel="noopener">YouTube</a>
+        <a href="https://github.com/tatnatYT/tatnat-launcher/releases" target="_blank" rel="noopener">All releases</a>
+      </div>
     </div>
     <p class="legal">Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</p>
   </footer>
