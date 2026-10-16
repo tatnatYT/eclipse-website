@@ -565,3 +565,126 @@ body.ready .letters.settled .ch.near { filter: drop-shadow(-3px 0 0 rgba(122, 21
   .game-hud { top: 8px; right: 8px; gap: 6px; }
   .game-hud span { font-size: 8px; padding: 5px 7px; border-radius: 7px; }
 }
+
+/* Minecraft-style font for name tags and advancements (Monocraft, SIL OFL: assets/fonts/monocraft-LICENSE.txt). */
+@font-face { font-family: 'Minecraft'; src: url('assets/fonts/monocraft.ttf') format('truetype'); font-display: swap; }
+
+/* ---------- 3D player model ---------- */
+.model-wrap { display: grid; grid-template-columns: 1fr; justify-items: center; gap: 22px; padding: 30px 20px 30px; border-radius: 26px;
+  background: radial-gradient(ellipse at 50% 85%, rgba(138, 99, 232, .32), transparent 60%), linear-gradient(180deg, rgba(36, 31, 50, .6), rgba(14, 12, 20, .85));
+  border: 1px solid var(--line); overflow: hidden; }
+.model-stage { position: relative; width: 100%; height: 480px; display: grid; place-items: center; perspective: 1100px; cursor: grab; touch-action: pan-y; user-select: none; }
+.model-stage.dragging { cursor: grabbing; }
+.model { position: relative; width: calc(var(--S) * 16); height: calc(var(--S) * 32); transform-style: preserve-3d; margin-top: 30px; }
+.part { position: absolute; transform-style: preserve-3d; }
+.box { position: absolute; inset: 0; transform-style: preserve-3d; }
+.face { position: absolute; background-image: url('assets/skin.png'); background-repeat: no-repeat; background-size: calc(var(--S) * 64) calc(var(--S) * 64); image-rendering: pixelated; backface-visibility: hidden; }
+.face.sd { filter: brightness(.82); } .face.bk { filter: brightness(.7); } .face.tp { filter: brightness(1.12); } .face.bt { filter: brightness(.6); }
+.layer .face { backface-visibility: visible; }
+.nametag { position: absolute; top: 4px; left: 50%; translate: -50% 0; z-index: 2; font: 22px/1 Minecraft, monospace; color: #fff; padding: 5px 9px 4px; background: rgba(0, 0, 0, .38); text-shadow: 2px 2px 0 #3f3f3f; pointer-events: none; }
+/* The ring's centre sits under the feet (the stage is a grid, so the model is centred vertically). */
+.platform { position: absolute; top: calc(50% + 15px + var(--S, 11px) * 16 - 150px); left: 50%; width: 300px; height: 300px; margin-left: -150px; transform: rotateX(80deg); pointer-events: none; }
+.model-stage { --S: 11px; }
+.platform i { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(180, 156, 255, .55); box-shadow: 0 0 40px rgba(138, 99, 232, .7), inset 0 0 60px rgba(138, 99, 232, .55); background: radial-gradient(circle, rgba(138, 99, 232, .45), transparent 65%); animation: plat 3s ease-in-out infinite; }
+@keyframes plat { 50% { box-shadow: 0 0 70px rgba(180, 156, 255, .9), inset 0 0 90px rgba(180, 156, 255, .7); } }
+.drag-hint { position: absolute; bottom: 4px; font: 700 11px Orbitron, sans-serif; letter-spacing: .2em; color: var(--faint); transition: opacity .5s; }
+.poses { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.poses button { font: 800 12px Orbitron, sans-serif; letter-spacing: .12em; color: var(--muted); padding: 10px 16px; border-radius: 11px; cursor: pointer; background: rgba(10, 9, 14, .6); border: 1px solid var(--line-2); transition: all .25s var(--ease); }
+.poses button:hover { color: #fff; border-color: rgba(180, 156, 255, .5); transform: translateY(-2px); }
+.poses button.on { color: #fff; background: linear-gradient(180deg, #9d7bf3, var(--accent)); border-color: transparent; box-shadow: 0 3px 0 var(--accent-dark), 0 8px 24px rgba(138, 99, 232, .5); }
+
+/* ---------- advancement toasts (Minecraft style) ---------- */
+.toasts { position: fixed; top: 84px; right: 18px; z-index: 180; display: grid; gap: 10px; pointer-events: none; }
+.toast { display: flex; align-items: center; gap: 14px; width: 320px; padding: 12px 16px 12px 12px; border-radius: 6px; font-family: Minecraft, monospace;
+  background: #212121; border: 2px solid #555; box-shadow: inset 0 0 0 2px #000, 0 12px 30px rgba(0, 0, 0, .5), 0 0 40px rgba(138, 99, 232, .25);
+  animation: toast-in .5s cubic-bezier(.2, 1.3, .4, 1) both; }
+.toast.out { animation: toast-out .45s ease forwards; }
+.toast .ico { flex: none; width: 40px; height: 40px; display: grid; place-items: center; font-size: 24px; border-radius: 4px; background: radial-gradient(circle, rgba(180, 156, 255, .35), transparent 70%); }
+.toast small { display: block; font-size: 13px; color: #ff0; margin-bottom: 4px; }
+.toast b { display: block; font-size: 15px; font-weight: 400; color: #fff; }
+.toast.challenge small { color: #d27dff; }
+@keyframes toast-in { from { opacity: 0; transform: translateX(120%); } to { opacity: 1; transform: none; } }
+@keyframes toast-out { to { opacity: 0; transform: translateX(120%); } }
+
+/* advancements in the footer */
+.adv { margin: 46px 0 0; padding: 22px; border-radius: 18px; background: rgba(20, 18, 28, .7); border: 1px solid var(--line); }
+.adv-head { display: flex; justify-content: space-between; align-items: baseline; font: 800 12px Orbitron, sans-serif; letter-spacing: .2em; color: var(--accent-light); }
+.adv-head b { color: #fff; font-size: 14px; letter-spacing: .1em; }
+.adv-bar { height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .06); margin: 12px 0 16px; overflow: hidden; }
+.adv-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent-dark), var(--accent-light), var(--pink)); box-shadow: 0 0 12px rgba(180, 156, 255, .8); transition: width .8s var(--ease); }
+.adv-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.adv-item { position: relative; width: 46px; height: 46px; display: grid; place-items: center; font-size: 22px; border-radius: 8px; background: #1b1922; border: 2px solid #34303f; filter: grayscale(1); opacity: .45; transition: all .4s var(--ease); }
+.adv-item.got { filter: none; opacity: 1; border-color: rgba(180, 156, 255, .6); box-shadow: 0 0 16px rgba(138, 99, 232, .45); }
+.adv-item::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%; translate: -50% 4px; width: max-content; max-width: 220px; padding: 7px 10px; border-radius: 6px; font: 12px/1.4 Minecraft, monospace; color: #fff; background: #100f15; border: 1px solid #3a3547; opacity: 0; pointer-events: none; transition: opacity .2s, translate .2s; z-index: 5; white-space: pre-line; }
+.adv-item:hover::after { opacity: 1; translate: -50% 0; }
+
+/* ---------- command menu ---------- */
+.kbd-btn { display: inline-flex; gap: 3px; padding: 6px 8px; border-radius: 10px; cursor: pointer; background: rgba(255, 255, 255, .04); border: 1px solid var(--line-2); transition: background .2s, border-color .2s; }
+.kbd-btn:hover { background: rgba(138, 99, 232, .2); border-color: rgba(180, 156, 255, .4); }
+kbd { font: 700 11px Inter, sans-serif; color: var(--muted); padding: 3px 6px; border-radius: 5px; background: rgba(255, 255, 255, .06); border: 1px solid var(--line-2); border-bottom-width: 2px; }
+.palette { position: fixed; inset: 0; z-index: 185; display: grid; justify-items: center; align-items: start; padding: 14vh 16px 0; background: rgba(6, 5, 9, .6); backdrop-filter: blur(6px); animation: pal-bg .2s ease; }
+.palette[hidden] { display: none; }
+.palette-box { width: min(620px, 100%); border-radius: 18px; overflow: hidden; background: rgba(22, 19, 30, .96); border: 1px solid rgba(180, 156, 255, .3); box-shadow: 0 40px 120px rgba(0, 0, 0, .6), 0 0 80px rgba(138, 99, 232, .3); animation: pal-in .25s var(--ease); }
+@keyframes pal-bg { from { opacity: 0; } }
+@keyframes pal-in { from { opacity: 0; transform: translateY(-14px) scale(.97); } }
+.palette-input { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+.palette-input svg { width: 20px; height: 20px; fill: none; stroke: var(--accent-light); stroke-width: 2.2; stroke-linecap: round; }
+.palette-input input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: var(--text); font: 500 17px Inter, sans-serif; }
+.palette-list { list-style: none; margin: 0; padding: 8px; max-height: 50vh; overflow: auto; }
+.palette-list li { display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 10px; cursor: pointer; color: var(--muted); font-weight: 600; font-size: 15px; }
+.palette-list li .pi { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: rgba(255, 255, 255, .05); font-size: 15px; }
+.palette-list li em { margin-left: auto; font: 700 10px Orbitron, sans-serif; font-style: normal; letter-spacing: .15em; color: var(--faint); }
+.palette-list li.on { background: rgba(138, 99, 232, .22); color: #fff; }
+.palette-list li.on .pi { background: rgba(138, 99, 232, .4); }
+.palette-list .empty { justify-content: center; color: var(--faint); cursor: default; }
+.palette-foot { display: flex; gap: 18px; padding: 10px 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--faint); }
+.palette-foot kbd { margin-right: 3px; }
+
+/* ---------- creeper easter egg ---------- */
+.creeper { position: fixed; inset: 0; z-index: 189; display: grid; place-items: center; pointer-events: none; visibility: hidden; }
+.creeper canvas { width: min(46vmin, 360px); height: min(46vmin, 360px); image-rendering: pixelated; box-shadow: 0 30px 90px rgba(0, 0, 0, .7); }
+.creeper.on { visibility: visible; animation: creeper-in .25s ease both; }
+.creeper.on canvas { animation: fuse .3s ease-in-out infinite alternate; }
+@keyframes creeper-in { from { opacity: 0; transform: scale(.4); } }
+@keyframes fuse { from { filter: brightness(1); transform: scale(1); } to { filter: brightness(2.6) saturate(.2); transform: scale(1.12); } }
+body.boom main, body.boom .footer, body.boom .nav { animation: quake .6s; }
+@keyframes quake { 10% { transform: translate(-14px, 8px); } 25% { transform: translate(12px, -10px); } 40% { transform: translate(-9px, -6px); } 60% { transform: translate(7px, 7px); } 80% { transform: translate(-4px, 3px); } }
+.flash { position: fixed; inset: 0; z-index: 188; background: #fff; pointer-events: none; animation: flash .7s ease-out forwards; }
+@keyframes flash { from { opacity: .95; } to { opacity: 0; } }
+.blown { transition: translate .55s cubic-bezier(.2, .9, .2, 1), rotate .55s cubic-bezier(.2, .9, .2, 1) !important; }
+.mend { transition: translate 1.1s cubic-bezier(.5, 0, .2, 1), rotate 1.1s cubic-bezier(.5, 0, .2, 1) !important; }
+
+/* ---------- footer, laid out in columns ---------- */
+.foot { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: 30px; padding-top: 10px; }
+.foot-brand .brand { display: inline-flex; }
+.foot-brand .wordmark { font-size: 18px; }
+.socials { display: flex; gap: 10px; margin: 18px 0; }
+.socials a { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: rgba(255, 255, 255, .04); border: 1px solid var(--line); color: var(--muted); transition: all .25s var(--ease); }
+.socials a:hover { color: #fff; background: rgba(138, 99, 232, .3); border-color: rgba(180, 156, 255, .45); transform: translateY(-3px); }
+.socials svg { width: 18px; height: 18px; fill: currentColor; }
+.foot-note { margin: 0; line-height: 1.8; }
+.foot-note .accent { color: var(--accent-light); font-weight: 600; }
+.foot-note .accent:hover { text-decoration: underline; }
+.foot-col { display: flex; flex-direction: column; gap: 9px; }
+.foot-col h4 { margin: 0 0 6px; color: #fff; font-size: 15px; font-weight: 800; }
+.foot-col a, .foot-col span { color: var(--muted); font-size: 15px; width: fit-content; transition: color .2s, translate .2s; }
+.foot-col a:hover { color: #fff; translate: 3px 0; }
+.foot-col .soon em { font: 800 9px Orbitron, sans-serif; font-style: normal; letter-spacing: .14em; color: var(--accent-light); padding: 3px 6px; margin-left: 4px; border-radius: 5px; background: rgba(138, 99, 232, .2); vertical-align: 2px; }
+.footer .legal { text-align: center; letter-spacing: .04em; font-size: 11px; font-weight: 600; margin-top: 30px; }
+
+@media (max-width: 960px) {
+  .foot { grid-template-columns: 1fr 1fr; }
+  .foot-brand { grid-column: 1 / -1; }
+  .kbd-btn { display: none; }
+  .model-stage { height: 420px; }
+  .model-stage { --S: 9.5px; }
+}
+@media (max-width: 600px) {
+  .toast { width: min(320px, calc(100vw - 36px)); }
+  .toasts { top: 76px; right: 12px; }
+}
+@media (max-width: 600px) {
+  .model-stage { --S: 7.5px; height: 340px; }
+  .nametag { font-size: 16px; }
+  .poses button { padding: 9px 12px; font-size: 11px; }
+}

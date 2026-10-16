@@ -4,6 +4,50 @@
   const $ = id => document.getElementById(id);
   const body = document.body;
   const rand = (a, b) => a + Math.random() * (b - a);
+  const typing = e => e.target.closest?.('input, textarea, [contenteditable]');
+
+  // ---------- advancements: Minecraft-style toasts for exploring the site, kept in this browser ----------
+  const ADV = [
+    { id: 'eclipse', ico: '🌑', title: 'Into the Shadow', desc: 'Scroll until the eclipse is total' },
+    { id: 'time', ico: '⏳', title: 'Time Traveller', desc: 'Scroll through every version' },
+    { id: 'keys', ico: '⌨️', title: 'Keyboard Warrior', desc: 'Press W, A, S or D' },
+    { id: 'spin', ico: '🌀', title: 'Spin Doctor', desc: 'Spin the 3D player all the way round' },
+    { id: 'dance', ico: '🕺', title: 'Show Off', desc: 'Make the 3D player dance' },
+    { id: 'flap', ico: '🪶', title: 'Frequent Flyer', desc: 'Score 5 in Flappy Eclipse' },
+    { id: 'flap20', ico: '🏆', title: 'Sky Legend', desc: 'Score 20 in Flappy Eclipse', challenge: true },
+    { id: 'faq', ico: '📖', title: 'Curious Mind', desc: 'Open 3 questions in the FAQ' },
+    { id: 'palette', ico: '🧭', title: 'Power User', desc: 'Open the command menu (Ctrl+K)' },
+    { id: 'download', ico: '💾', title: 'Getting an Upgrade', desc: 'Click a download button' },
+    { id: 'end', ico: '🔚', title: 'The End?', desc: 'Reach the bottom of the page' },
+    { id: 'total', ico: '☀️', title: 'Total Eclipse', desc: 'Type the secret word', secret: true },
+    { id: 'creeper', ico: '💥', title: 'Sssss...', desc: 'Type the other secret word', secret: true },
+  ];
+  let got = new Set();
+  try { got = new Set(JSON.parse(localStorage.getItem('eclipse-adv') || '[]')); } catch { /* storage off */ }
+  function toast(small, title, ico, challenge) {
+    const t = document.createElement('div'); t.className = `toast${challenge ? ' challenge' : ''}`;
+    t.innerHTML = `<span class="ico">${ico}</span><div><small>${small}</small><b>${title}</b></div>`;
+    $('toasts').append(t);
+    setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 500); }, 4200);
+  }
+  function renderAdv() {
+    $('advCount').textContent = `${got.size} / ${ADV.length}`;
+    $('advBar').style.width = `${got.size / ADV.length * 100}%`;
+    $('advGrid').innerHTML = ADV.map(a => {
+      const has = got.has(a.id), hide = a.secret && !has;
+      return `<span class="adv-item${has ? ' got' : ''}" data-tip="${hide ? '???\nA secret advancement' : `${a.title}\n${a.desc}`}">${hide ? '?' : a.ico}</span>`;
+    }).join('');
+  }
+  function unlock(id) {
+    if (got.has(id)) return;
+    const a = ADV.find(x => x.id === id); if (!a) return;
+    got.add(id);
+    try { localStorage.setItem('eclipse-adv', JSON.stringify([...got])); } catch { /* storage off */ }
+    toast(a.challenge ? 'Challenge Complete!' : 'Advancement Made!', a.title, a.ico, a.challenge);
+    renderAdv();
+    if (got.size === ADV.length) setTimeout(() => toast('Challenge Complete!', 'Eclipse Master', '👑', true), 900);
+  }
+  renderAdv();
 
   // ---------- intro (once per visit, click to skip), then the hero animates in ----------
   let seen = false;
@@ -197,7 +241,7 @@
   window.addEventListener('keydown', e => {
     const k = e.key.toLowerCase();
     if (!'wasd'.includes(k) || k.length !== 1 || e.target.closest?.('input, textarea')) return;
-    takeOver(); keyEls[k].classList.add('down');
+    takeOver(); keyEls[k].classList.add('down'); unlock('keys');
   });
   window.addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (k.length === 1 && 'wasd'.includes(k)) keyEls[k].classList.remove('down'); });
   window.addEventListener('mousedown', e => {
@@ -313,6 +357,8 @@
     const logoMid = logoWrap.offsetTop + heroContent.offsetTop + logoWrap.offsetHeight / 2;
     const ecDist = Math.min(320, Math.max(140, logoMid - 110));
     heroEl.style.setProperty('--ec', Math.min(1, window.scrollY / ecDist).toFixed(3));
+    if (window.scrollY >= ecDist) unlock('eclipse');
+    if (window.scrollY + innerHeight >= document.documentElement.scrollHeight - 40) unlock('end');
     const tr = tl.getBoundingClientRect();
     if (tr.bottom > 0 && tr.top < innerHeight) {
       const tp = Math.min(1, Math.max(0, -tr.top / (tr.height - innerHeight)));
@@ -322,6 +368,7 @@
       let best = null, bestD = Infinity;
       tlCards.forEach(c => { const r = c.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - innerWidth / 2); if (d < bestD) { bestD = d; best = c; } });
       tlCards.forEach(c => c.classList.toggle('on', c === best));
+      if (tp > .97) unlock('time');
     }
     const max = document.documentElement.scrollHeight - window.innerHeight;
     progress.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
@@ -437,17 +484,213 @@
   }, { passive: true });
 
   // ---------- easter egg: type "eclipse" ----------
-  let typed = '';
-  window.addEventListener('keydown', e => {
-    if (e.key.length !== 1) return;
-    typed = (typed + e.key.toLowerCase()).slice(-7);
-    if (typed !== 'eclipse') return;
-    typed = '';
+  function totality() {
     const t = $('totality');
     t.classList.remove('on'); void t.offsetWidth; t.classList.add('on');
     warp = 1; burst(innerWidth / 2, innerHeight / 2);
     setTimeout(() => t.classList.remove('on'), 4300);
+    unlock('total');
+  }
+
+  // ---------- easter egg: type "creeper" (it hisses, then the page blows apart and builds itself back) ----------
+  (() => {
+    const c = $('creeperFace').getContext('2d');
+    const FACE = ['........', '........', '.XX..XX.', '.XX..XX.', '...XX...', '..XXXX..', '..XXXX..', '..X..X..'];
+    const GREENS = ['#4fbb3b', '#5fcf4a', '#3e9e2e', '#6fd65a', '#479f37', '#8be07a'];
+    FACE.forEach((row, y) => [...row].forEach((ch, x) => { c.fillStyle = ch === 'X' ? (Math.random() < .5 ? '#0b0b0b' : '#1d1d1d') : GREENS[Math.floor(Math.random() * GREENS.length)]; c.fillRect(x, y, 1, 1); }));
+  })();
+  let creeping = false;
+  function creeper() {
+    if (creeping) return;
+    creeping = true;
+    const cr = $('creeper');
+    cr.classList.add('on');
+    setTimeout(() => {
+      cr.classList.remove('on');
+      const fl = document.createElement('div'); fl.className = 'flash'; body.append(fl); setTimeout(() => fl.remove(), 800);
+      body.classList.add('boom'); setTimeout(() => body.classList.remove('boom'), 650);
+      for (let n = 0; n < 6; n++) burst(innerWidth / 2 + rand(-200, 200), innerHeight / 2 + rand(-150, 150));
+      warp = 1;
+      const cx = innerWidth / 2, cy = innerHeight / 2;
+      const parts = [...document.querySelectorAll('.hero-content > *, .section > *:not(.bento):not(.story), .bento > .tile, .story-stage, .story-step, .stat, .marquee, .cta > :not(.cta-grid):not(.cta-stars), .tl-card, .footer > *')]
+        .filter(el => { const r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight && r.width > 0; });
+      parts.forEach(el => {
+        const r = el.getBoundingClientRect(), dx = r.left + r.width / 2 - cx, dy = r.top + r.height / 2 - cy, d = Math.hypot(dx, dy) || 1, f = rand(260, 700);
+        el.classList.add('blown');
+        el.style.translate = `${(dx / d * f + rand(-80, 80)).toFixed(0)}px ${(dy / d * f + rand(-120, 40)).toFixed(0)}px`;
+        el.style.rotate = `${rand(-50, 50).toFixed(0)}deg`;
+      });
+      setTimeout(() => {
+        parts.forEach(el => { el.classList.replace('blown', 'mend'); el.style.translate = ''; el.style.rotate = ''; });
+        setTimeout(() => { parts.forEach(el => el.classList.remove('mend')); creeping = false; }, 1200);
+      }, 1000);
+      unlock('creeper');
+    }, 1500);
+  }
+
+  let typed = '';
+  window.addEventListener('keydown', e => {
+    if (e.key.length !== 1 || typing(e)) return;
+    typed = (typed + e.key.toLowerCase()).slice(-7);
+    if (typed === 'eclipse') { typed = ''; totality(); }
+    if (typed === 'creeper') { typed = ''; creeper(); }
   });
+
+  // ---------- small advancement triggers ----------
+  document.querySelectorAll('.download-link').forEach(a => a.addEventListener('click', () => unlock('download')));
+  const opened = new Set();
+  document.querySelectorAll('.faq details').forEach((d, i) => d.addEventListener('toggle', () => { if (d.open) opened.add(i); if (opened.size >= 3) unlock('faq'); }));
+
+  // ---------- command menu (Ctrl+K) ----------
+  const pal = $('palette'), palInput = $('paletteInput'), palList = $('paletteList');
+  const go = sel => () => document.querySelector(sel).scrollIntoView({ behavior: 'smooth', block: sel === '#game' || sel === '#modelStage' ? 'center' : 'start' });
+  const COMMANDS = [
+    { ico: '⬇️', label: 'Download Eclipse', hint: 'WINDOWS', run: () => { unlock('download'); location.href = document.querySelector('.download-link').href; } },
+    { ico: '✨', label: 'Go to Features', hint: 'SECTION', run: go('#features') },
+    { ico: '⚡', label: 'Go to Performance', hint: 'SECTION', run: go('#fps') },
+    { ico: '⏳', label: 'Go to Versions', hint: 'SECTION', run: go('#timeline') },
+    { ico: '🖥️', label: 'Go to Showcase', hint: 'SECTION', run: go('#showcase') },
+    { ico: '🧍', label: 'Spin the 3D skin', hint: 'SECTION', run: go('#modelStage') },
+    { ico: '🕺', label: 'Make the player dance', hint: 'FUN', run: () => { go('#modelStage')(); setPose('dance'); } },
+    { ico: '🪶', label: 'Play Flappy Eclipse', hint: 'GAME', run: go('#game') },
+    { ico: '📦', label: 'How to install', hint: 'SECTION', run: go('#install') },
+    { ico: '❓', label: 'Questions (FAQ)', hint: 'SECTION', run: go('#faq') },
+    { ico: '🏆', label: 'My advancements', hint: `${got.size}/${ADV.length}`, run: go('#adv') },
+    { ico: '🌑', label: 'Total eclipse', hint: 'FUN', run: totality },
+    { ico: '▶️', label: 'YouTube channel', hint: 'LINK', run: () => window.open('https://www.youtube.com/@tatnatmc', '_blank', 'noopener') },
+    { ico: '🐙', label: 'Source code on GitHub', hint: 'LINK', run: () => window.open('https://github.com/tatnatYT/tatnat-launcher', '_blank', 'noopener') },
+    { ico: '🔗', label: 'Copy the link to this site', hint: 'SHARE', run: () => { navigator.clipboard?.writeText(location.href.split('#')[0]); toast('Copied!', 'Link copied to the clipboard', '🔗'); } },
+    { ico: '⬆️', label: 'Back to the top', hint: 'SECTION', run: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+  ];
+  let palItems = [], palSel = 0;
+  function renderPalette() {
+    const q = palInput.value.trim().toLowerCase();
+    COMMANDS.find(c => c.ico === '🏆').hint = `${got.size}/${ADV.length}`;
+    palItems = COMMANDS.filter(c => !q || c.label.toLowerCase().includes(q) || c.hint.toLowerCase().includes(q));
+    palSel = Math.min(palSel, Math.max(0, palItems.length - 1));
+    palList.innerHTML = palItems.length ? palItems.map((c, i) => `<li role="option" data-i="${i}" class="${i === palSel ? 'on' : ''}" aria-selected="${i === palSel}"><span class="pi">${c.ico}</span>${c.label}<em>${c.hint}</em></li>`).join('') : '<li class="empty">Nothing found</li>';
+    palList.querySelector('.on')?.scrollIntoView({ block: 'nearest' });
+  }
+  function openPalette() { pal.hidden = false; palInput.value = ''; palSel = 0; renderPalette(); palInput.focus(); unlock('palette'); }
+  function closePalette() { pal.hidden = true; }
+  function runPalette(i) { const c = palItems[i]; if (!c) return; closePalette(); c.run(); }
+  window.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); pal.hidden ? openPalette() : closePalette(); return; }
+    if (pal.hidden) return;
+    if (e.key === 'Escape') closePalette();
+    else if (e.key === 'ArrowDown') { e.preventDefault(); palSel = (palSel + 1) % Math.max(1, palItems.length); renderPalette(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); palSel = (palSel - 1 + palItems.length) % Math.max(1, palItems.length); renderPalette(); }
+    else if (e.key === 'Enter') { e.preventDefault(); runPalette(palSel); }
+  });
+  palInput.addEventListener('input', () => { palSel = 0; renderPalette(); });
+  palList.addEventListener('mousemove', e => { const li = e.target.closest('li[data-i]'); if (li && Number(li.dataset.i) !== palSel) { palSel = Number(li.dataset.i); renderPalette(); } });
+  palList.addEventListener('click', e => { const li = e.target.closest('li[data-i]'); if (li) runPalette(Number(li.dataset.i)); });
+  pal.addEventListener('mousedown', e => { if (e.target === pal) closePalette(); });
+  $('paletteBtn').addEventListener('click', openPalette);
+
+  // ---------- 3D player: built from the skin's boxes, drag to spin, six animations ----------
+  const model = $('model'), mStage = $('modelStage');
+  let pose = 'idle', limbs = null;
+  function setPose(p) {
+    pose = p;
+    document.querySelectorAll('#poses button').forEach(b => b.classList.toggle('on', b.dataset.pose === p));
+    if (p === 'dance') unlock('dance');
+  }
+  $('poses').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setPose(b.dataset.pose); });
+  const z = n => `calc(var(--S) * ${n})`;
+  function face(cls, u, v, w, h, transform, left, top) {
+    const f = document.createElement('i'); f.className = `face ${cls}`;
+    f.style.cssText = `width:${z(w)};height:${z(h)};left:${z(left)};top:${z(top)};background-position:${z(-u)} ${z(-v)};transform:${transform}`;
+    return f;
+  }
+  // Minecraft's box UV layout: top/bottom along the first row, then right, front, left and back.
+  function box([u, v], w, h, d, layer) {
+    const b = document.createElement('div'); b.className = `box${layer ? ' layer' : ''}`;
+    b.append(
+      face('', u + d, v + d, w, h, `translateZ(${z(d / 2)})`, 0, 0),
+      face('bk', u + 2 * d + w, v + d, w, h, `rotateY(180deg) translateZ(${z(d / 2)})`, 0, 0),
+      face('sd', u, v + d, d, h, `rotateY(-90deg) translateZ(${z(w / 2)})`, (w - d) / 2, 0),
+      face('sd', u + d + w, v + d, d, h, `rotateY(90deg) translateZ(${z(w / 2)})`, (w - d) / 2, 0),
+      face('tp', u + d, v, w, d, `rotateX(90deg) translateZ(${z(h / 2)})`, 0, (h - d) / 2),
+      face('bt', u + d + w, v, w, d, `rotateX(-90deg) translateZ(${z(h / 2)})`, 0, (h - d) / 2));
+    if (layer) b.style.transform = `scale3d(${(w + 1) / w}, ${(h + 1) / h}, ${(d + 1) / d})`;
+    return b;
+  }
+  function part(x, y, w, h, d, base, over, origin) {
+    const p = document.createElement('div'); p.className = 'part';
+    p.style.cssText = `left:${z(x)};top:${z(y)};width:${z(w)};height:${z(h)};transform-origin:${origin}`;
+    p.append(box(base, w, h, d), box(over, w, h, d, true));
+    model.append(p); return p;
+  }
+  function build(slim) {
+    const aw = slim ? 3 : 4;
+    limbs = {
+      legR: part(4, 20, 4, 12, 4, [0, 16], [0, 32], '50% 0'),
+      legL: part(8, 20, 4, 12, 4, [16, 48], [0, 48], '50% 0'),
+      body: part(4, 8, 8, 12, 4, [16, 16], [16, 32], '50% 100%'),
+      armR: part(4 - aw, 8, aw, 12, 4, [40, 16], [40, 32], `50% ${z(2)}`),
+      armL: part(12, 8, aw, 12, 4, [32, 48], [48, 48], `50% ${z(2)}`),
+      head: part(4, 0, 8, 8, 8, [0, 0], [32, 0], '50% 100%'),
+    };
+  }
+  // Slim (Alex-style) skins leave the outer arm column empty.
+  const skinImg = new Image();
+  skinImg.onload = () => {
+    let slim = false;
+    try { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const cx = cv.getContext('2d'); cx.drawImage(skinImg, 0, 0); slim = cx.getImageData(55, 20, 1, 1).data[3] === 0; } catch { /* keep classic */ }
+    build(slim);
+  };
+  skinImg.onerror = () => build(false);
+  skinImg.src = 'assets/skin.png';
+
+  let yawM = -25, pitchM = -8, velM = 0, dragging = false, dragX = 0, dragY = 0, idleSince = 0, spun = 0, stageVisible = false;
+  new IntersectionObserver(([e]) => { stageVisible = e.isIntersecting; }).observe(mStage);
+  mStage.addEventListener('pointerdown', e => { dragging = true; dragX = e.clientX; dragY = e.clientY; velM = 0; mStage.classList.add('dragging'); mStage.setPointerCapture(e.pointerId); $('dragHint').style.opacity = 0; });
+  mStage.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const dx = e.clientX - dragX, dy = e.clientY - dragY; dragX = e.clientX; dragY = e.clientY;
+    yawM += dx * .55; pitchM = Math.max(-35, Math.min(35, pitchM - dy * .3)); velM = dx * .55;
+    spun += Math.abs(dx * .55); if (spun >= 360) unlock('spin');
+  });
+  const endDrag = () => { if (!dragging) return; dragging = false; idleSince = performance.now(); mStage.classList.remove('dragging'); };
+  mStage.addEventListener('pointerup', endDrag); mStage.addEventListener('pointercancel', endDrag);
+  (function animate(t) {
+    requestAnimationFrame(animate);
+    if (!stageVisible || !limbs) return;
+    if (!dragging) {
+      yawM += velM; velM *= .94;
+      if (Math.abs(velM) < .05 && t - idleSince > 1500) yawM += .25;
+      pitchM += (-8 - pitchM) * .02;
+    }
+    const s = Math.sin, S = parseFloat(getComputedStyle(model).getPropertyValue('--S')) || 11;
+    let armR = '', armL = '', legR = '', legL = '', head = '', bodyT = '', bob = 0;
+    if (pose === 'idle') {
+      armR = `rotateZ(${3 + s(t / 900) * 3}deg) rotateX(${s(t / 1100) * 3}deg)`; armL = `rotateZ(${-3 - s(t / 900) * 3}deg) rotateX(${-s(t / 1100) * 3}deg)`;
+      head = `rotateY(${s(t / 2200) * 12}deg) rotateX(${s(t / 1700) * 4}deg)`;
+    } else if (pose === 'walk' || pose === 'run') {
+      const run = pose === 'run', a = s(t * (run ? .012 : .0065)) * (run ? 70 : 38);
+      armR = `rotateX(${a}deg)`; armL = `rotateX(${-a}deg)`; legR = `rotateX(${-a * .9}deg)`; legL = `rotateX(${a * .9}deg)`;
+      bob = Math.abs(s(t * (run ? .012 : .0065))) * (run ? -10 : -4);
+      if (run) { bodyT = 'rotateX(-8deg)'; head = 'rotateX(6deg)'; }
+    } else if (pose === 'wave') {
+      armR = `rotateZ(${150 + s(t * .012) * 20}deg)`; armL = 'rotateZ(-4deg)';
+      head = `rotateZ(${s(t * .006) * 6}deg) rotateY(-10deg)`;
+    } else if (pose === 'dance') {
+      const a = s(t * .009);
+      armR = `rotateZ(${100 + a * 60}deg)`; armL = `rotateZ(${-100 + a * 60}deg)`;
+      legR = `rotateZ(${Math.max(0, a) * 18}deg)`; legL = `rotateZ(${Math.min(0, a) * 18}deg)`;
+      head = `rotateZ(${a * 14}deg)`; bodyT = `rotateZ(${a * -6}deg)`; bob = -Math.abs(s(t * .018)) * 14;
+    } else if (pose === 'sneak') {
+      bodyT = `translateZ(${S * 2}px) rotateX(-28deg)`;
+      head = `translateY(${S * 1.6}px) translateZ(${S * 4.2}px)`;
+      armR = armL = `translateY(${S * 1.2}px) translateZ(${S * 3.5}px) rotateX(-26deg)`;
+      legR = legL = `translateZ(${-S * 1}px)`; bob = S * 1.4;
+    }
+    limbs.armR.style.transform = armR; limbs.armL.style.transform = armL;
+    limbs.legR.style.transform = legR; limbs.legL.style.transform = legL;
+    limbs.head.style.transform = head; limbs.body.style.transform = bodyT;
+    model.style.transform = `translateY(${bob}px) rotateX(${pitchM}deg) rotateY(${yawM}deg)`;
+  })(0);
 
   // ---------- ECLIPSE letters lean toward the mouse once they've landed ----------
   const letters = document.querySelector('.hero .letters'), chs = [...letters.children];
@@ -505,7 +748,7 @@
       if (tick % 92 === 1) pipes.push({ x: WW + 20, top: rand(50, WH - 40 - GAP - 30), passed: false });
       for (const p of pipes) {
         p.x -= SPEED;
-        if (!p.passed && p.x + PW < X - 14) { p.passed = true; score++; $('flapScore').textContent = score; }
+        if (!p.passed && p.x + PW < X - 14) { p.passed = true; score++; $('flapScore').textContent = score; if (score === 5) unlock('flap'); if (score === 20) unlock('flap20'); }
         if (X + 12 > p.x && X - 12 < p.x + PW && (y - 12 < p.top || y + 12 > p.top + GAP)) die();
       }
       pipes = pipes.filter(p => p.x > -PW - 10);
@@ -564,7 +807,7 @@
     cv.addEventListener('mouseenter', () => { hover = true; });
     cv.addEventListener('mouseleave', () => { hover = false; });
     window.addEventListener('keydown', e => {
-      if (e.code !== 'Space' && e.code !== 'ArrowUp') return;
+      if ((e.code !== 'Space' && e.code !== 'ArrowUp') || typing(e) || !pal.hidden) return;
       const r = cv.getBoundingClientRect();
       if (!(hover || state === 'play') || r.top < 0 || r.bottom > innerHeight) return;
       e.preventDefault(); if (!e.repeat) flap();
