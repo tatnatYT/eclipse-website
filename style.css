@@ -224,8 +224,7 @@ body.ready .letters .ch { animation: letter-in .8s cubic-bezier(.2, 1, .3, 1) ca
 /* ---------- marquee ---------- */
 .marquee { position: relative; z-index: 3; padding: 26px 0; display: grid; gap: 12px; overflow: hidden; transform: rotate(-2deg) scale(1.04); margin: 10px 0 0;
   -webkit-mask: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); mask: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
-.marquee-row { display: flex; gap: 14px; width: max-content; animation: marquee 50s linear infinite; }
-.marquee-row.reverse { animation-direction: reverse; animation-duration: 60s; }
+.marquee-row { display: flex; gap: 14px; width: max-content; will-change: transform; }
 .marquee-row span {
   display: inline-flex; align-items: center; gap: 12px; padding: 12px 22px; border-radius: 999px; white-space: nowrap;
   font: 800 15px Orbitron, Inter, sans-serif; letter-spacing: .1em; color: #ddd4ff;
@@ -233,7 +232,6 @@ body.ready .letters .ch { animation: letter-in .8s cubic-bezier(.2, 1, .3, 1) ca
 }
 .marquee-row span::before { content: ''; width: 8px; height: 8px; background: var(--accent-light); box-shadow: 0 0 10px var(--accent-light); }
 .marquee-row.reverse span { background: linear-gradient(90deg, rgba(138, 99, 232, .3), rgba(91, 63, 174, .2)); }
-.marquee:hover .marquee-row { animation-play-state: paused; }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
 /* ---------- sections ---------- */
@@ -366,7 +364,6 @@ h3 { margin: 0 0 8px; font-size: 19px; letter-spacing: -.01em; }
 .window::before { content: ''; position: absolute; inset: -1px; z-index: 3; border-radius: inherit; padding: 1.5px; pointer-events: none;
   background: conic-gradient(from var(--a), transparent 0 25%, var(--accent-light) 35%, transparent 45% 70%, var(--pink) 80%, transparent 90%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: spin-a 6s linear infinite; }
-.window:hover { --wy: 0deg; --wx: 0deg; }
 .window-bar { display: flex; align-items: center; gap: 7px; padding: 11px 14px; background: #15131b; border-bottom: 1px solid var(--line); }
 .window-bar i { width: 11px; height: 11px; border-radius: 50%; background: #3a3547; }
 .window-bar i:nth-child(1) { background: #ff6b8a; } .window-bar i:nth-child(2) { background: #ffcf6b; } .window-bar i:nth-child(3) { background: #6ff0b0; }
@@ -533,3 +530,38 @@ h3 { margin: 0 0 8px; font-size: 19px; letter-spacing: -.01em; }
   .timeline { height: 420vh; }
 }
 @media (hover: none) { .dust { display: none; } }
+
+/* ---------- ECLIPSE letters: once they've landed they lean toward the mouse ---------- */
+body.ready .letters.settled .ch { animation: none; opacity: 1; filter: drop-shadow(0 6px 30px rgba(138, 99, 232, .55)); transition: translate .35s var(--ease), rotate .35s var(--ease), scale .35s var(--ease), filter .25s; }
+body.ready .letters.settled .ch.near { filter: drop-shadow(-3px 0 0 rgba(122, 216, 255, .75)) drop-shadow(3px 0 0 rgba(224, 122, 255, .75)) drop-shadow(0 6px 30px rgba(180, 156, 255, .9)); }
+
+/* ---------- showcase window: follows the mouse, with a glare ---------- */
+.window.tracking { transition: transform .15s ease-out; }
+.glare { position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: 0; transition: opacity .4s; mix-blend-mode: soft-light;
+  background: radial-gradient(600px circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 255, 255, .55), transparent 45%); }
+.window.tracking .glare { opacity: 1; }
+
+/* ---------- mini game ---------- */
+.game { position: relative; border-radius: 22px; overflow: hidden; border: 1px solid var(--line-2); background: #08070c;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, .5), 0 0 80px rgba(138, 99, 232, .2); }
+.game::before { content: ''; position: absolute; inset: -1px; z-index: 2; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: conic-gradient(from var(--a), transparent 0 30%, var(--accent-light) 40%, transparent 50% 75%, var(--cyan) 85%, transparent 95%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; animation: spin-a 7s linear infinite; }
+#flappy { display: block; width: 100%; aspect-ratio: 16 / 9; cursor: pointer; touch-action: manipulation; }
+.game-hud { position: absolute; top: 16px; right: 18px; display: flex; gap: 10px; pointer-events: none; }
+.game-hud span { font: 800 11px Orbitron, sans-serif; letter-spacing: .16em; color: var(--muted); padding: 8px 12px; border-radius: 10px; background: rgba(14, 12, 20, .7); border: 1px solid var(--line-2); backdrop-filter: blur(6px); }
+.game-hud b { color: #fff; margin-left: 6px; }
+.game.shake { animation: shake .35s; }
+@keyframes shake { 20% { transform: translate(-6px, 3px); } 40% { transform: translate(5px, -4px); } 60% { transform: translate(-4px, -2px); } 80% { transform: translate(3px, 3px); } }
+
+/* ---------- final banner: a neon pixel grid floor rushing toward you ---------- */
+.cta-grid { position: absolute; left: -20%; right: -20%; bottom: 0; height: 55%; perspective: 260px; pointer-events: none;
+  -webkit-mask: linear-gradient(transparent, #000 60%); mask: linear-gradient(transparent, #000 60%); }
+.cta-grid i { position: absolute; inset: -50% 0 0; transform-origin: 50% 100%; transform: rotateX(62deg);
+  background-image: linear-gradient(rgba(180, 156, 255, .55) 2px, transparent 2px), linear-gradient(90deg, rgba(180, 156, 255, .55) 2px, transparent 2px);
+  background-size: 48px 48px; animation: grid-run 1.4s linear infinite; filter: drop-shadow(0 0 6px rgba(224, 122, 255, .8)); }
+@keyframes grid-run { to { background-position: 0 48px, 0 48px; } }
+@media (max-width: 600px) {
+  .game-hud { top: 8px; right: 8px; gap: 6px; }
+  .game-hud span { font-size: 8px; padding: 5px 7px; border-radius: 7px; }
+}

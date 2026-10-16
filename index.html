@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
   <!-- Intro: a shadow slides over the glowing moon (an eclipse), then the page appears. -->
@@ -44,6 +44,7 @@
       <a href="#fps">Performance</a>
       <a href="#timeline">Versions</a>
       <a href="#showcase">Showcase</a>
+      <a href="#play">Play</a>
       <a href="#install">Install</a>
       <a href="#faq">FAQ</a>
     </nav>
@@ -118,7 +119,7 @@
           <div class="keys" id="keys">
             <div class="key k-w" data-k="w">W</div>
             <div class="key k-a" data-k="a">A</div><div class="key k-s" data-k="s">S</div><div class="key k-d" data-k="d">D</div>
-            <div class="key k-l" data-k="l">LMB<small id="cpsL">0 CPS</small></div><div class="key k-r" data-k="r">RMB<small>0 CPS</small></div>
+            <div class="key k-l" data-k="l">LMB<small id="cpsL">0 CPS</small></div><div class="key k-r" data-k="r">RMB<small id="cpsR">0 CPS</small></div>
           </div>
           <div>
             <span class="chip">80 MODS</span>
@@ -288,8 +289,20 @@
               <img class="shot" src="assets/shots/launcher-skins.png" alt="The skins page" loading="lazy">
               <img class="shot" src="assets/shots/launcher-mods.png" alt="Installed mods, packs and shaders" loading="lazy">
             </div>
+            <div class="glare"></div>
           </figure>
         </div>
+      </div>
+    </section>
+
+    <!-- ================= mini game ================= -->
+    <section class="section" id="play">
+      <p class="eyebrow scramble">// PLAY</p>
+      <h2>Bored while it loads?</h2>
+      <p class="lead">The launcher has Flappy Bird with your own head while Minecraft starts. Try it right here.</p>
+      <div class="game reveal" id="game">
+        <canvas id="flappy" aria-label="Flappy Bird mini game: click, tap or press Space to flap"></canvas>
+        <div class="game-hud"><span>SCORE <b id="flapScore">0</b></span><span>BEST <b id="flapBest">0</b></span></div>
       </div>
     </section>
 
@@ -320,6 +333,7 @@
 
     <!-- ================= final call ================= -->
     <section class="cta reveal">
+      <div class="cta-grid" aria-hidden="true"><i></i></div>
       <div class="cta-stars" id="ctaStars"></div>
       <h2>Ready to play?</h2>
       <p>Free, every version, and set up in a minute.</p>
@@ -345,6 +359,6 @@
     <p class="legal">Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</p>
   </footer>
 
-  <script src="main.js?v=4"></script>
+  <script src="main.js?v=5"></script>
 </body>
 </html>

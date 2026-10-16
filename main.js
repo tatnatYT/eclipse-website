@@ -120,6 +120,25 @@
   const fill = (el, list) => { const html = list.map(m => `<span>${m}</span>`).join(''); el.innerHTML = html + html; };
   fill($('marqueeA'), MODS.slice(0, 15));
   fill($('marqueeB'), MODS.slice(15));
+  // The rows drift on their own, rush along with your scrolling and flip direction when you scroll back up.
+  const rowsM = [{ el: $('marqueeA'), x: 0, dir: -1 }, { el: $('marqueeB'), x: 0, dir: 1 }];
+  let lastY = window.scrollY, vel = 0, scrollDir = 1, mqHover = false, mqLast = performance.now();
+  document.querySelector('.marquee').addEventListener('mouseenter', () => { mqHover = true; });
+  document.querySelector('.marquee').addEventListener('mouseleave', () => { mqHover = false; });
+  (function marquee(t) {
+    const dt = Math.min(50, t - mqLast) / 16.67; mqLast = t;
+    const dy = window.scrollY - lastY; lastY = window.scrollY;
+    if (dy) scrollDir = Math.sign(dy);
+    vel += (Math.min(40, Math.abs(dy)) - vel) * .1;
+    const speed = (mqHover ? .15 : 1) * (.9 + vel * .9) * scrollDir;
+    for (const r of rowsM) {
+      const half = r.el.scrollWidth / 2;
+      r.x = (r.x + r.dir * speed * dt) % half;
+      if (r.x > 0) r.x -= half;
+      r.el.style.transform = `translate3d(${r.x}px, 0, 0)`;
+    }
+    requestAnimationFrame(marquee);
+  })(mqLast);
 
   // ---------- floating pixel cubes ----------
   for (let n = 0; n < 18; n++) {
@@ -170,8 +189,27 @@
   const keyEls = {};
   document.querySelectorAll('.key').forEach(k => { keyEls[k.dataset.k] = k; });
   const PATTERN = ['w', 'w', 'a', 'wl', 'wl', 'd', 'wl', 'l', 'wd', 's', 'l', 'wa', 'r', 'w', 'wl', 'wl', 'd', 'a'];
-  let pi = 0, clicks = [];
+  let pi = 0, clicks = [], realUntil = 0;
+  // Your own keys and clicks take over the tile for a few seconds.
+  const realClicks = { l: [], r: [] };
+  const cps = side => { realClicks[side] = realClicks[side].filter(c => Date.now() - c < 1000); $(side === 'l' ? 'cpsL' : 'cpsR').textContent = `${realClicks[side].length} CPS`; };
+  const takeOver = () => { if (Date.now() > realUntil) Object.values(keyEls).forEach(k => k.classList.remove('down')); realUntil = Date.now() + 3000; };
+  window.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    if (!'wasd'.includes(k) || k.length !== 1 || e.target.closest?.('input, textarea')) return;
+    takeOver(); keyEls[k].classList.add('down');
+  });
+  window.addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (k.length === 1 && 'wasd'.includes(k)) keyEls[k].classList.remove('down'); });
+  window.addEventListener('mousedown', e => {
+    const side = e.button === 0 ? 'l' : e.button === 2 ? 'r' : null;
+    if (!side) return;
+    takeOver(); keyEls[side].classList.add('down'); realClicks[side].push(Date.now()); cps(side);
+  });
+  window.addEventListener('mouseup', () => { keyEls.l.classList.remove('down'); keyEls.r.classList.remove('down'); });
+  $('keys').closest('.tile').addEventListener('contextmenu', e => e.preventDefault());
   setInterval(() => {
+    if (Date.now() < realUntil) { cps('l'); cps('r'); return; }
+    $('cpsR').textContent = '0 CPS';
     const p = PATTERN[pi++ % PATTERN.length];
     Object.values(keyEls).forEach(k => k.classList.remove('down'));
     for (const ch of p) keyEls[ch]?.classList.add('down');
@@ -410,4 +448,127 @@
     warp = 1; burst(innerWidth / 2, innerHeight / 2);
     setTimeout(() => t.classList.remove('on'), 4300);
   });
+
+  // ---------- ECLIPSE letters lean toward the mouse once they've landed ----------
+  const letters = document.querySelector('.hero .letters'), chs = [...letters.children];
+  let landed = 0;
+  letters.addEventListener('animationend', e => { if (e.animationName === 'letter-in' && ++landed === chs.length) letters.classList.add('settled'); });
+  window.addEventListener('mousemove', e => {
+    if (!letters.classList.contains('settled') || window.scrollY > innerHeight) return;
+    for (const ch of chs) {
+      const r = ch.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      const f = Math.max(0, 1 - Math.hypot(dx, dy) / 260);
+      ch.style.translate = `${(-dx * f * .08).toFixed(1)}px ${(-f * 18).toFixed(1)}px`;
+      ch.style.rotate = `${(dx / 260 * f * -10).toFixed(1)}deg`;
+      ch.style.scale = (1 + f * .12).toFixed(3);
+      ch.classList.toggle('near', f > .45);
+    }
+  }, { passive: true });
+
+  // ---------- showcase window tilts toward the mouse, with a glare ----------
+  const win = $('window'), glare = win.querySelector('.glare');
+  win.addEventListener('mousemove', e => {
+    const r = win.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    win.classList.add('tracking');
+    win.style.setProperty('--wy', `${((x - .5) * 14).toFixed(2)}deg`); win.style.setProperty('--wx', `${((.5 - y) * 10).toFixed(2)}deg`);
+    glare.style.setProperty('--gx', `${x * 100}%`); glare.style.setProperty('--gy', `${y * 100}%`);
+  });
+  win.addEventListener('mouseleave', () => { win.classList.remove('tracking'); win.style.removeProperty('--wy'); win.style.removeProperty('--wx'); });
+
+  // ---------- Flappy Bird with the Eclipse skin head ----------
+  (() => {
+    const cv = $('flappy'), g = cv.getContext('2d'), game = $('game');
+    const WW = 640, WH = 360, X = 150, GAP = 118, PW = 58, SPEED = 2.7, GRAV = .36, FLAP = -6.4;
+    const skin = new Image(); skin.src = 'assets/skin.png';
+    let best = 0;
+    try { best = Number(localStorage.getItem('eclipse-flappy-best')) || 0; } catch { /* storage off */ }
+    $('flapBest').textContent = best;
+    let state = 'ready', y = WH / 2, vy = 0, pipes = [], score = 0, tick = 0, deadAt = 0, flash = 0, visible = false, hover = false, acc = 0, last = 0;
+    const bg = Array.from({ length: 70 }, () => ({ x: Math.random() * WW, y: Math.random() * (WH - 40), z: rand(.2, 1) }));
+    function size() { const r = Math.min(2, devicePixelRatio || 1); cv.width = cv.clientWidth * r; cv.height = cv.clientHeight * r; }
+    function reset() { y = WH / 2; vy = 0; pipes = []; score = 0; tick = 0; $('flapScore').textContent = 0; }
+    function flap() {
+      if (state === 'dead') { if (performance.now() - deadAt < 600) return; reset(); state = 'ready'; return; }
+      if (state === 'ready') state = 'play';
+      vy = FLAP;
+    }
+    function die() {
+      state = 'dead'; deadAt = performance.now(); flash = 1;
+      game.classList.remove('shake'); void game.offsetWidth; game.classList.add('shake');
+      if (score > best) { best = score; $('flapBest').textContent = best; try { localStorage.setItem('eclipse-flappy-best', best); } catch { /* storage off */ } }
+    }
+    function step() {
+      for (const s of bg) { s.x -= s.z * (state === 'play' ? 1 : .3); if (s.x < 0) s.x += WW; }
+      if (state === 'ready') { y = WH / 2 + Math.sin(tick++ / 14) * 8; return; }
+      if (state === 'dead') { if (y < WH - 30) { vy += GRAV; y += vy; } return; }
+      tick++; vy = Math.min(9, vy + GRAV); y += vy;
+      if (tick % 92 === 1) pipes.push({ x: WW + 20, top: rand(50, WH - 40 - GAP - 30), passed: false });
+      for (const p of pipes) {
+        p.x -= SPEED;
+        if (!p.passed && p.x + PW < X - 14) { p.passed = true; score++; $('flapScore').textContent = score; }
+        if (X + 12 > p.x && X - 12 < p.x + PW && (y - 12 < p.top || y + 12 > p.top + GAP)) die();
+      }
+      pipes = pipes.filter(p => p.x > -PW - 10);
+      if (y > WH - 30 - 12 || y < 12) die();
+    }
+    function pillar(x, y0, h, capAtBottom) {
+      const grad = g.createLinearGradient(x, 0, x + PW, 0);
+      grad.addColorStop(0, '#2a1d4d'); grad.addColorStop(.35, '#6f4fd0'); grad.addColorStop(1, '#22183f');
+      g.fillStyle = grad; g.fillRect(x, y0, PW, h);
+      g.fillStyle = 'rgba(255,255,255,.12)'; g.fillRect(x + 8, y0, 4, h);
+      const cy = capAtBottom ? y0 + h - 16 : y0;
+      g.fillStyle = '#9d7bf3'; g.fillRect(x - 5, cy, PW + 10, 16);
+      g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x - 5, cy + 12, PW + 10, 4);
+    }
+    function draw() {
+      const s = cv.width / WW;
+      g.setTransform(s, 0, 0, s, 0, 0); g.imageSmoothingEnabled = false;
+      const sky = g.createLinearGradient(0, 0, 0, WH); sky.addColorStop(0, '#0c0a16'); sky.addColorStop(1, '#2a1b4a');
+      g.fillStyle = sky; g.fillRect(0, 0, WW, WH);
+      // A small eclipse in the sky.
+      g.fillStyle = 'rgba(180,156,255,.25)'; g.beginPath(); g.arc(520, 70, 34, 0, 7); g.fill();
+      g.fillStyle = '#0c0a16'; g.beginPath(); g.arc(520, 70, 28, 0, 7); g.fill();
+      for (const st of bg) { g.globalAlpha = .3 + st.z * .6; g.fillStyle = st.z > .8 ? '#fff' : '#c9b8ff'; g.fillRect(st.x, st.y, st.z * 2.4, st.z * 2.4); }
+      g.globalAlpha = 1;
+      for (const p of pipes) { pillar(p.x, 0, p.top, true); pillar(p.x, p.top + GAP, WH - 30 - p.top - GAP, false); }
+      // Ground: grass and dirt blocks scrolling by.
+      const off = state === 'play' ? (tick * SPEED) % 30 : 0;
+      for (let gx = -off; gx < WW; gx += 30) { g.fillStyle = '#3b2a63'; g.fillRect(gx, WH - 30, 30, 30); g.fillStyle = '#7a57d8'; g.fillRect(gx, WH - 30, 30, 7); g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(gx + 29, WH - 30, 1, 30); }
+      // The head, tilted with its speed.
+      g.save(); g.translate(X, y); g.rotate(Math.max(-.5, Math.min(1.1, vy / 9)));
+      g.shadowColor = 'rgba(180,156,255,.8)'; g.shadowBlur = 16;
+      if (skin.complete && skin.naturalWidth) { g.drawImage(skin, 8, 8, 8, 8, -14, -14, 28, 28); g.shadowBlur = 0; g.drawImage(skin, 40, 8, 8, 8, -15.5, -15.5, 31, 31); }
+      else { g.fillStyle = '#b49cff'; g.fillRect(-14, -14, 28, 28); }
+      g.restore();
+      g.textAlign = 'center';
+      if (state === 'play' || state === 'dead') { g.font = '900 44px Orbitron, sans-serif'; g.fillStyle = '#fff'; g.shadowColor = 'rgba(180,156,255,.9)'; g.shadowBlur = 18; g.fillText(score, WW / 2, 66); g.shadowBlur = 0; }
+      if (state !== 'play') {
+        g.fillStyle = 'rgba(8,7,12,.45)'; g.fillRect(0, 0, WW, WH);
+        g.fillStyle = '#fff'; g.font = '900 30px Orbitron, sans-serif';
+        g.fillText(state === 'dead' ? 'GAME OVER' : 'FLAPPY ECLIPSE', WW / 2, WH / 2 - 40);
+        g.font = '600 15px Inter, sans-serif'; g.fillStyle = '#d8d1ee';
+        g.fillText(state === 'dead' ? `Score ${score} · Best ${best} · click to try again` : 'Click, tap or press Space to flap', WW / 2, WH / 2 + 60);
+      }
+      if (flash > 0) { g.fillStyle = `rgba(255,255,255,${flash * .6})`; g.fillRect(0, 0, WW, WH); flash = Math.max(0, flash - .08); }
+    }
+    // Fixed 60 steps a second, so the game plays the same on any monitor.
+    function loop(t) {
+      if (!visible) { last = 0; return; }
+      if (last) acc = Math.min(acc + (t - last), 200);
+      last = t;
+      while (acc >= 1000 / 60) { step(); acc -= 1000 / 60; }
+      draw(); requestAnimationFrame(loop);
+    }
+    new IntersectionObserver(([e]) => { const was = visible; visible = e.isIntersecting; if (visible && !was) requestAnimationFrame(loop); if (!visible && state === 'play') { state = 'ready'; reset(); } }).observe(cv);
+    cv.addEventListener('pointerdown', e => { e.preventDefault(); flap(); });
+    cv.addEventListener('mouseenter', () => { hover = true; });
+    cv.addEventListener('mouseleave', () => { hover = false; });
+    window.addEventListener('keydown', e => {
+      if (e.code !== 'Space' && e.code !== 'ArrowUp') return;
+      const r = cv.getBoundingClientRect();
+      if (!(hover || state === 'play') || r.top < 0 || r.bottom > innerHeight) return;
+      e.preventDefault(); if (!e.repeat) flap();
+    });
+    size(); window.addEventListener('resize', size);
+  })();
 })();
