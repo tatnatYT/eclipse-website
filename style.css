@@ -688,3 +688,17 @@ body.boom main, body.boom .footer, body.boom .nav { animation: quake .6s; }
   .nametag { font-size: 16px; }
   .poses button { padding: 9px 12px; font-size: 11px; }
 }
+
+/* The giant wordmark's box hugs the text exactly (the gradient fill is painted inside the box only),
+   and the word is sized to always fit the footer. */
+.giant { width: max-content; max-width: none; margin-left: auto; margin-right: auto; white-space: nowrap; font-size: min(12.4vw, 150px); }
+
+/* Line icons (replacing emoji) in the command menu, toasts and advancements. */
+.ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.palette-list li .pi { color: var(--accent-light); }
+.palette-list li.on .pi { color: #fff; }
+.toast .ico { color: var(--accent-light); }
+.toast .ico .ic { width: 24px; height: 24px; }
+.toast.challenge .ico { color: #d27dff; }
+.adv-item { color: var(--accent-light); font: 800 18px Orbitron, sans-serif; }
+.adv-item .ic { width: 22px; height: 22px; }

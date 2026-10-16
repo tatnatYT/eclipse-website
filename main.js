@@ -6,27 +6,57 @@
   const rand = (a, b) => a + Math.random() * (b - a);
   const typing = e => e.target.closest?.('input, textarea, [contenteditable]');
 
+  // ---------- line icons (24x24, drawn with the current text colour) ----------
+  const ICON = {
+    moon: '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    keyboard: '<rect x="2" y="6" width="20" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',
+    rotate: '<path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/>',
+    music: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+    feather: '<path d="M20 4C11 4 6 9 5 19"/><path d="M5 19l-1 2"/><path d="M8.5 14H15M11 9.5h6"/>',
+    trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3.5 4M16 6h3a3 3 0 0 1-3.5 4M12 13v4M8 21h8M9.5 17h5"/>',
+    book: '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/>',
+    command: '<path d="M9 6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3z"/>',
+    download: '<path d="M12 3v12M7 10l5 5 5-5M4 20h16"/>',
+    flag: '<path d="M5 21V4M5 4h12l-2.5 4L17 12H5"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    burst: '<path d="M12 2l1.8 5.6L19 5l-2.6 5.2L22 12l-5.6 1.8L19 19l-5.2-2.6L12 22l-1.8-5.6L5 19l2.6-5.2L2 12l5.6-1.8L5 5l5.2 2.6z"/>',
+    crown: '<path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/>',
+    sparkle: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.7 1.8 1.8.7-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z"/>',
+    bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+    monitor: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+    gamepad: '<rect x="2" y="7" width="20" height="11" rx="5.5"/><path d="M7 12.5h4M9 10.5v4M15.5 11.5h.01M18 13.5h.01"/>',
+    box: '<path d="M3 7.5l9-4.5 9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5l9 4.5 9-4.5M12 12v9"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.6 2.6 0 1 1 3.6 2.4c-.7.3-1.1.9-1.1 1.6v.5M12 17h.01"/>',
+    play: '<rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9.2l5 2.8-5 2.8z"/>',
+    code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+    link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+    up: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+  };
+  const icon = name => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[name] || ''}</svg>`;
+
   // ---------- advancements: Minecraft-style toasts for exploring the site, kept in this browser ----------
   const ADV = [
-    { id: 'eclipse', ico: '🌑', title: 'Into the Shadow', desc: 'Scroll until the eclipse is total' },
-    { id: 'time', ico: '⏳', title: 'Time Traveller', desc: 'Scroll through every version' },
-    { id: 'keys', ico: '⌨️', title: 'Keyboard Warrior', desc: 'Press W, A, S or D' },
-    { id: 'spin', ico: '🌀', title: 'Spin Doctor', desc: 'Spin the 3D player all the way round' },
-    { id: 'dance', ico: '🕺', title: 'Show Off', desc: 'Make the 3D player dance' },
-    { id: 'flap', ico: '🪶', title: 'Frequent Flyer', desc: 'Score 5 in Flappy Eclipse' },
-    { id: 'flap20', ico: '🏆', title: 'Sky Legend', desc: 'Score 20 in Flappy Eclipse', challenge: true },
-    { id: 'faq', ico: '📖', title: 'Curious Mind', desc: 'Open 3 questions in the FAQ' },
-    { id: 'palette', ico: '🧭', title: 'Power User', desc: 'Open the command menu (Ctrl+K)' },
-    { id: 'download', ico: '💾', title: 'Getting an Upgrade', desc: 'Click a download button' },
-    { id: 'end', ico: '🔚', title: 'The End?', desc: 'Reach the bottom of the page' },
-    { id: 'total', ico: '☀️', title: 'Total Eclipse', desc: 'Type the secret word', secret: true },
-    { id: 'creeper', ico: '💥', title: 'Sssss...', desc: 'Type the other secret word', secret: true },
+    { id: 'eclipse', ico: 'moon', title: 'Into the Shadow', desc: 'Scroll until the eclipse is total' },
+    { id: 'time', ico: 'clock', title: 'Time Traveller', desc: 'Scroll through every version' },
+    { id: 'keys', ico: 'keyboard', title: 'Keyboard Warrior', desc: 'Press W, A, S or D' },
+    { id: 'spin', ico: 'rotate', title: 'Spin Doctor', desc: 'Spin the 3D player all the way round' },
+    { id: 'dance', ico: 'music', title: 'Show Off', desc: 'Make the 3D player dance' },
+    { id: 'flap', ico: 'feather', title: 'Frequent Flyer', desc: 'Score 5 in Flappy Eclipse' },
+    { id: 'flap20', ico: 'trophy', title: 'Sky Legend', desc: 'Score 20 in Flappy Eclipse', challenge: true },
+    { id: 'faq', ico: 'book', title: 'Curious Mind', desc: 'Open 3 questions in the FAQ' },
+    { id: 'palette', ico: 'command', title: 'Power User', desc: 'Open the command menu (Ctrl+K)' },
+    { id: 'download', ico: 'download', title: 'Getting an Upgrade', desc: 'Click a download button' },
+    { id: 'end', ico: 'flag', title: 'The End?', desc: 'Reach the bottom of the page' },
+    { id: 'total', ico: 'sun', title: 'Total Eclipse', desc: 'Type the secret word', secret: true },
+    { id: 'creeper', ico: 'burst', title: 'Sssss...', desc: 'Type the other secret word', secret: true },
   ];
   let got = new Set();
   try { got = new Set(JSON.parse(localStorage.getItem('eclipse-adv') || '[]')); } catch { /* storage off */ }
   function toast(small, title, ico, challenge) {
     const t = document.createElement('div'); t.className = `toast${challenge ? ' challenge' : ''}`;
-    t.innerHTML = `<span class="ico">${ico}</span><div><small>${small}</small><b>${title}</b></div>`;
+    t.innerHTML = `<span class="ico">${icon(ico)}</span><div><small>${small}</small><b>${title}</b></div>`;
     $('toasts').append(t);
     setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 500); }, 4200);
   }
@@ -35,7 +65,7 @@
     $('advBar').style.width = `${got.size / ADV.length * 100}%`;
     $('advGrid').innerHTML = ADV.map(a => {
       const has = got.has(a.id), hide = a.secret && !has;
-      return `<span class="adv-item${has ? ' got' : ''}" data-tip="${hide ? '???\nA secret advancement' : `${a.title}\n${a.desc}`}">${hide ? '?' : a.ico}</span>`;
+      return `<span class="adv-item${has ? ' got' : ''}" data-tip="${hide ? '???\nA secret advancement' : `${a.title}\n${a.desc}`}">${hide ? '?' : icon(a.ico)}</span>`;
     }).join('');
   }
   function unlock(id) {
@@ -45,7 +75,7 @@
     try { localStorage.setItem('eclipse-adv', JSON.stringify([...got])); } catch { /* storage off */ }
     toast(a.challenge ? 'Challenge Complete!' : 'Advancement Made!', a.title, a.ico, a.challenge);
     renderAdv();
-    if (got.size === ADV.length) setTimeout(() => toast('Challenge Complete!', 'Eclipse Master', '👑', true), 900);
+    if (got.size === ADV.length) setTimeout(() => toast('Challenge Complete!', 'Eclipse Master', 'crown', true), 900);
   }
   renderAdv();
 
@@ -545,30 +575,30 @@
   const pal = $('palette'), palInput = $('paletteInput'), palList = $('paletteList');
   const go = sel => () => document.querySelector(sel).scrollIntoView({ behavior: 'smooth', block: sel === '#game' || sel === '#modelStage' ? 'center' : 'start' });
   const COMMANDS = [
-    { ico: '⬇️', label: 'Download Eclipse', hint: 'WINDOWS', run: () => { unlock('download'); location.href = document.querySelector('.download-link').href; } },
-    { ico: '✨', label: 'Go to Features', hint: 'SECTION', run: go('#features') },
-    { ico: '⚡', label: 'Go to Performance', hint: 'SECTION', run: go('#fps') },
-    { ico: '⏳', label: 'Go to Versions', hint: 'SECTION', run: go('#timeline') },
-    { ico: '🖥️', label: 'Go to Showcase', hint: 'SECTION', run: go('#showcase') },
-    { ico: '🧍', label: 'Spin the 3D skin', hint: 'SECTION', run: go('#modelStage') },
-    { ico: '🕺', label: 'Make the player dance', hint: 'FUN', run: () => { go('#modelStage')(); setPose('dance'); } },
-    { ico: '🪶', label: 'Play Flappy Eclipse', hint: 'GAME', run: go('#game') },
-    { ico: '📦', label: 'How to install', hint: 'SECTION', run: go('#install') },
-    { ico: '❓', label: 'Questions (FAQ)', hint: 'SECTION', run: go('#faq') },
-    { ico: '🏆', label: 'My advancements', hint: `${got.size}/${ADV.length}`, run: go('#adv') },
-    { ico: '🌑', label: 'Total eclipse', hint: 'FUN', run: totality },
-    { ico: '▶️', label: 'YouTube channel', hint: 'LINK', run: () => window.open('https://www.youtube.com/@tatnatmc', '_blank', 'noopener') },
-    { ico: '🐙', label: 'Source code on GitHub', hint: 'LINK', run: () => window.open('https://github.com/tatnatYT/tatnat-launcher', '_blank', 'noopener') },
-    { ico: '🔗', label: 'Copy the link to this site', hint: 'SHARE', run: () => { navigator.clipboard?.writeText(location.href.split('#')[0]); toast('Copied!', 'Link copied to the clipboard', '🔗'); } },
-    { ico: '⬆️', label: 'Back to the top', hint: 'SECTION', run: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
+    { ico: 'download', label: 'Download Eclipse', hint: 'WINDOWS', run: () => { unlock('download'); location.href = document.querySelector('.download-link').href; } },
+    { ico: 'sparkle', label: 'Go to Features', hint: 'SECTION', run: go('#features') },
+    { ico: 'bolt', label: 'Go to Performance', hint: 'SECTION', run: go('#fps') },
+    { ico: 'clock', label: 'Go to Versions', hint: 'SECTION', run: go('#timeline') },
+    { ico: 'monitor', label: 'Go to Showcase', hint: 'SECTION', run: go('#showcase') },
+    { ico: 'user', label: 'Spin the 3D skin', hint: 'SECTION', run: go('#modelStage') },
+    { ico: 'music', label: 'Make the player dance', hint: 'FUN', run: () => { go('#modelStage')(); setPose('dance'); } },
+    { ico: 'gamepad', label: 'Play Flappy Eclipse', hint: 'GAME', run: go('#game') },
+    { ico: 'box', label: 'How to install', hint: 'SECTION', run: go('#install') },
+    { ico: 'help', label: 'Questions (FAQ)', hint: 'SECTION', run: go('#faq') },
+    { id: 'adv', ico: 'trophy', label: 'My advancements', hint: `${got.size}/${ADV.length}`, run: go('#adv') },
+    { ico: 'moon', label: 'Total eclipse', hint: 'FUN', run: totality },
+    { ico: 'play', label: 'YouTube channel', hint: 'LINK', run: () => window.open('https://www.youtube.com/@tatnatmc', '_blank', 'noopener') },
+    { ico: 'code', label: 'Source code on GitHub', hint: 'LINK', run: () => window.open('https://github.com/tatnatYT/tatnat-launcher', '_blank', 'noopener') },
+    { ico: 'link', label: 'Copy the link to this site', hint: 'SHARE', run: () => { navigator.clipboard?.writeText(location.href.split('#')[0]); toast('Copied!', 'Link copied to the clipboard', 'link'); } },
+    { ico: 'up', label: 'Back to the top', hint: 'SECTION', run: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
   ];
   let palItems = [], palSel = 0;
   function renderPalette() {
     const q = palInput.value.trim().toLowerCase();
-    COMMANDS.find(c => c.ico === '🏆').hint = `${got.size}/${ADV.length}`;
+    COMMANDS.find(c => c.id === 'adv').hint = `${got.size}/${ADV.length}`;
     palItems = COMMANDS.filter(c => !q || c.label.toLowerCase().includes(q) || c.hint.toLowerCase().includes(q));
     palSel = Math.min(palSel, Math.max(0, palItems.length - 1));
-    palList.innerHTML = palItems.length ? palItems.map((c, i) => `<li role="option" data-i="${i}" class="${i === palSel ? 'on' : ''}" aria-selected="${i === palSel}"><span class="pi">${c.ico}</span>${c.label}<em>${c.hint}</em></li>`).join('') : '<li class="empty">Nothing found</li>';
+    palList.innerHTML = palItems.length ? palItems.map((c, i) => `<li role="option" data-i="${i}" class="${i === palSel ? 'on' : ''}" aria-selected="${i === palSel}"><span class="pi">${icon(c.ico)}</span>${c.label}<em>${c.hint}</em></li>`).join('') : '<li class="empty">Nothing found</li>';
     palList.querySelector('.on')?.scrollIntoView({ block: 'nearest' });
   }
   function openPalette() { pal.hidden = false; palInput.value = ''; palSel = 0; renderPalette(); palInput.focus(); unlock('palette'); }
@@ -627,7 +657,7 @@
     limbs = {
       legR: part(4, 20, 4, 12, 4, [0, 16], [0, 32], '50% 0'),
       legL: part(8, 20, 4, 12, 4, [16, 48], [0, 48], '50% 0'),
-      body: part(4, 8, 8, 12, 4, [16, 16], [16, 32], '50% 100%'),
+      body: part(4, 8, 8, 12, 4, [16, 16], [16, 32], '50% 0'),
       armR: part(4 - aw, 8, aw, 12, 4, [40, 16], [40, 32], `50% ${z(2)}`),
       armL: part(12, 8, aw, 12, 4, [32, 48], [48, 48], `50% ${z(2)}`),
       head: part(4, 0, 8, 8, 8, [0, 0], [32, 0], '50% 100%'),
@@ -681,10 +711,12 @@
       legR = `rotateZ(${Math.max(0, a) * 18}deg)`; legL = `rotateZ(${Math.min(0, a) * 18}deg)`;
       head = `rotateZ(${a * 14}deg)`; bodyT = `rotateZ(${a * -6}deg)`; bob = -Math.abs(s(t * .018)) * 14;
     } else if (pose === 'sneak') {
-      bodyT = `translateZ(${S * 2}px) rotateX(-28deg)`;
-      head = `translateY(${S * 1.6}px) translateZ(${S * 4.2}px)`;
-      armR = armL = `translateY(${S * 1.2}px) translateZ(${S * 3.5}px) rotateX(-26deg)`;
-      legR = legL = `translateZ(${-S * 1}px)`; bob = S * 1.4;
+      // Minecraft's own sneak: the body bends at the neck (0.5 rad) so its lower half swings back,
+      // head, body and arms drop 4.2 / 3.2 / 3.2 pixels, arms follow the lean (0.4 rad), legs step back 4.
+      bodyT = `translateY(${S * 3.2}px) rotateX(-28.6deg)`;
+      head = `translateY(${S * 4.2}px)`;
+      armR = armL = `translateY(${S * 3.2}px) rotateX(-22.9deg)`;
+      legR = legL = `translateZ(${-S * 4}px)`;
     }
     limbs.armR.style.transform = armR; limbs.armL.style.transform = armL;
     limbs.legR.style.transform = legR; limbs.legL.style.transform = legL;
