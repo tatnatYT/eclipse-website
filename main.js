@@ -95,7 +95,7 @@
     const text = el.textContent; el.textContent = '';
     [...text].forEach((ch, i) => { const c = document.createElement('span'); c.className = 'ch'; c.textContent = ch; c.style.setProperty('--i', i); el.append(c); });
   });
-  document.querySelectorAll('.section h2, .cta h2').forEach(h => {
+  document.querySelectorAll('.section h2, .cta h2, .timeline h2').forEach(h => {
     const words = h.textContent.trim().split(/\s+/); h.textContent = '';
     words.forEach((w, i) => {
       const o = document.createElement('span'); o.className = 'w';
@@ -230,16 +230,17 @@
   // ---------- reveal on scroll ----------
   function countTo(el) {
     const to = Number(el.dataset.to), t0 = performance.now();
-    (function step(t) { const p = Math.min(1, (t - t0) / 1800), e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(to * e); if (p < 1) requestAnimationFrame(step); })(t0);
+    const suffix = el.dataset.suffix || '';
+    (function step(t) { const p = Math.min(1, (t - t0) / 1800), e = 1 - Math.pow(1 - p, 3); el.textContent = Math.round(to * e) + suffix; if (p < 1) requestAnimationFrame(step); })(t0);
   }
   const io = new IntersectionObserver(entries => entries.forEach(e => {
     if (!e.isIntersecting) return;
     e.target.classList.add('in');
     if (e.target.classList.contains('scramble')) scramble(e.target);
-    if (e.target.id === 'compare') e.target.querySelectorAll('[data-to]').forEach(countTo);
+    if (e.target.id === 'compare' || e.target.classList.contains('stat')) e.target.querySelectorAll('[data-to]').forEach(countTo);
     io.unobserve(e.target);
   }), { threshold: 0.15 });
-  document.querySelectorAll('.reveal, .section h2, .cta h2, .eyebrow, #steps').forEach(el => io.observe(el));
+  document.querySelectorAll('.reveal, .section h2, .cta h2, .timeline h2, .eyebrow, #steps').forEach(el => io.observe(el));
 
   // ---------- sticky showcase: the screenshot follows the step in the middle of the screen ----------
   const steps = [...document.querySelectorAll('.story-step')], shots = [...document.querySelectorAll('.shot')];
@@ -262,8 +263,28 @@
     pill.style.opacity = 1; pill.style.left = `${a.offsetLeft}px`; pill.style.width = `${a.offsetWidth}px`;
     links.forEach(l => l.classList.toggle('on', l === a));
   }
+  // Hero: scrolling eclipses the logo (--ec) and pushes the content away (--sp).
+  const heroEl = $('hero'), heroContent = heroEl.querySelector('.hero-content'), logoWrap = heroEl.querySelector('.logo-wrap');
+  // Timeline: pinned while the cards slide sideways.
+  const tl = $('timeline'), track = $('tlTrack'), tlFill = $('tlFill'), tlCards = [...track.children];
   function onScroll() {
     nav.classList.toggle('solid', window.scrollY > 40);
+    const sp = Math.min(1, Math.max(0, window.scrollY / (heroEl.offsetHeight * .6)));
+    heroEl.style.setProperty('--sp', sp.toFixed(3));
+    // Totality is reached while the logo is still well on screen, whatever the window height.
+    const logoMid = logoWrap.offsetTop + heroContent.offsetTop + logoWrap.offsetHeight / 2;
+    const ecDist = Math.min(320, Math.max(140, logoMid - 110));
+    heroEl.style.setProperty('--ec', Math.min(1, window.scrollY / ecDist).toFixed(3));
+    const tr = tl.getBoundingClientRect();
+    if (tr.bottom > 0 && tr.top < innerHeight) {
+      const tp = Math.min(1, Math.max(0, -tr.top / (tr.height - innerHeight)));
+      track.style.transform = `translate3d(${-tp * Math.max(0, track.scrollWidth - innerWidth)}px, 0, 0)`;
+      tlFill.parentElement.style.setProperty('--tp', tp.toFixed(4));
+      // The card nearest the middle of the screen lights up.
+      let best = null, bestD = Infinity;
+      tlCards.forEach(c => { const r = c.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - innerWidth / 2); if (d < bestD) { bestD = d; best = c; } });
+      tlCards.forEach(c => c.classList.toggle('on', c === best));
+    }
     const max = document.documentElement.scrollHeight - window.innerHeight;
     progress.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
     let current = null;
@@ -271,13 +292,16 @@
     movePill(current);
   }
   window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
   onScroll();
 
   // ---------- mouse: glow + ring cursor, hero parallax, magnetic buttons, tilting tiles ----------
   const glow = $('cursorGlow'), ring = $('cursorRing'), hero = $('hero');
   let mx = -500, my = -500, gx = -500, gy = -500, rx = -500, ry = -500;
+  let lastMove = -1e9;
   window.addEventListener('mousemove', e => {
-    mx = e.clientX; my = e.clientY; body.classList.add('mouse');
+    if (mx > -500) sprinkle(e.clientX, e.clientY, Math.hypot(e.clientX - mx, e.clientY - my));
+    mx = e.clientX; my = e.clientY; lastMove = performance.now(); body.classList.add('mouse');
     const px = e.clientX / innerWidth - .5, py = e.clientY / innerHeight - .5;
     hero.style.setProperty('--mx', px.toFixed(3)); hero.style.setProperty('--my', py.toFixed(3));
     pmx = px; pmy = py;
@@ -316,4 +340,74 @@
     s.style.left = `${e.clientX - r.left - d / 2}px`; s.style.top = `${e.clientY - r.top - d / 2}px`;
     b.append(s); setTimeout(() => s.remove(), 650);
   }));
+
+  // ---------- stardust: a trail behind the cursor and a burst on every click ----------
+  const dust = $('dust'), dctx = dust.getContext('2d'), COLORS = ['#ffffff', '#d9ccff', '#b49cff', '#e07aff', '#7ad8ff'];
+  let motes = [], dustOn = false;
+  function sizeDust() { const r = Math.min(2, devicePixelRatio || 1); dust.width = innerWidth * r; dust.height = innerHeight * r; dctx.setTransform(r, 0, 0, r, 0, 0); }
+  function mote(x, y, vx, vy, life) { motes.push({ x, y, vx, vy, life, max: life, s: rand(1, 2.6), c: COLORS[Math.floor(Math.random() * COLORS.length)] }); }
+  function sprinkle(x, y, speed) {
+    for (let n = Math.min(3, Math.floor(speed / 14)); n >= 0; n--) if (Math.random() < .7) mote(x + rand(-4, 4), y + rand(-4, 4), rand(-.5, .5), rand(-.2, .8), rand(28, 50));
+    wakeDust();
+  }
+  function burst(x, y) {
+    for (let n = 0; n < 34; n++) { const a = rand(0, Math.PI * 2), v = rand(1.5, 6.5); mote(x, y, Math.cos(a) * v, Math.sin(a) * v, rand(35, 70)); }
+    wakeDust();
+  }
+  function wakeDust() { if (!dustOn) { dustOn = true; requestAnimationFrame(drawDust); } }
+  function drawDust() {
+    dctx.clearRect(0, 0, innerWidth, innerHeight);
+    motes = motes.filter(m => --m.life > 0);
+    for (const m of motes) {
+      m.x += m.vx; m.y += m.vy; m.vx *= .95; m.vy = m.vy * .95 + .04;
+      const a = m.life / m.max, s = m.s * (.5 + a);
+      dctx.globalAlpha = a; dctx.fillStyle = m.c;
+      dctx.fillRect(m.x - s / 2, m.y - s / 2, s, s);
+      if (m.s > 2.2) { dctx.globalAlpha = a * .4; dctx.fillRect(m.x - s * 2, m.y - .5, s * 4, 1); dctx.fillRect(m.x - .5, m.y - s * 2, 1, s * 4); }
+    }
+    dctx.globalAlpha = 1;
+    if (motes.length) requestAnimationFrame(drawDust); else { dustOn = false; dctx.clearRect(0, 0, innerWidth, innerHeight); }
+  }
+  sizeDust(); window.addEventListener('resize', sizeDust);
+  window.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse') burst(e.clientX, e.clientY); });
+
+  // ---------- the skin head looks at the cursor, and spins on its own when the mouse rests ----------
+  const mcHead = $('mcHead'), headStage = mcHead.parentElement;
+  let yaw = 0, pitch = -14;
+  (function look() {
+    const r = headStage.getBoundingClientRect();
+    if (r.bottom > 0 && r.top < innerHeight) {
+      if (performance.now() - lastMove < 2500) {
+        const dx = mx - (r.left + r.width / 2), dy = my - (r.top + r.height / 2);
+        yaw = ((yaw + 180) % 360 + 360) % 360 - 180;
+        yaw += (Math.max(-70, Math.min(70, dx / 5)) - yaw) * .1;
+        pitch += (Math.max(-40, Math.min(40, -dy / 6)) - pitch) * .1;
+      } else {
+        yaw += .7; pitch += (-18 - pitch) * .04;
+      }
+      mcHead.style.transform = `rotateX(${pitch.toFixed(2)}deg) rotateY(${yaw.toFixed(2)}deg)`;
+    }
+    requestAnimationFrame(look);
+  })();
+
+  // ---------- footer wordmark: spotlight under the mouse ----------
+  const giant = document.querySelector('.giant');
+  window.addEventListener('mousemove', e => {
+    const r = giant.getBoundingClientRect();
+    if (r.bottom < -200 || r.top > innerHeight + 200) return;
+    giant.style.setProperty('--gx', `${e.clientX - r.left}px`); giant.style.setProperty('--gy', `${e.clientY - r.top}px`);
+  }, { passive: true });
+
+  // ---------- easter egg: type "eclipse" ----------
+  let typed = '';
+  window.addEventListener('keydown', e => {
+    if (e.key.length !== 1) return;
+    typed = (typed + e.key.toLowerCase()).slice(-7);
+    if (typed !== 'eclipse') return;
+    typed = '';
+    const t = $('totality');
+    t.classList.remove('on'); void t.offsetWidth; t.classList.add('on');
+    warp = 1; burst(innerWidth / 2, innerHeight / 2);
+    setTimeout(() => t.classList.remove('on'), 4300);
+  });
 })();

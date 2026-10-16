@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <!-- Intro: a shadow slides over the glowing moon (an eclipse), then the page appears. -->
@@ -28,6 +28,9 @@
   <div class="cursor-ring" id="cursorRing"></div>
   <div class="cursor-glow" id="cursorGlow"></div>
   <div class="grain" aria-hidden="true"></div>
+  <canvas class="dust" id="dust" aria-hidden="true"></canvas>
+  <!-- Easter egg: type "eclipse" anywhere. -->
+  <div class="totality" id="totality" aria-hidden="true"><div class="t-sun"><i></i></div><p>TOTAL ECLIPSE</p></div>
   <div class="cubes" id="cubes" aria-hidden="true"></div>
 
   <header class="nav" id="nav">
@@ -39,6 +42,7 @@
       <span class="links-pill" id="linksPill"></span>
       <a href="#features">Features</a>
       <a href="#fps">Performance</a>
+      <a href="#timeline">Versions</a>
       <a href="#showcase">Showcase</a>
       <a href="#install">Install</a>
       <a href="#faq">FAQ</a>
@@ -59,7 +63,9 @@
           <div class="orbit"><i></i><i></i><i></i></div>
           <div class="orbit o2"><i></i><i></i></div>
           <div class="logo-halo"></div>
+          <div class="corona"></div>
           <img class="hero-logo" src="assets/logo.png" alt="Eclipse Client logo" width="140" height="140">
+          <div class="moon-shadow"></div>
         </div>
         <h1 class="wordmark big"><span class="letters">ECLIPSE</span><small>CLIENT</small></h1>
         <p class="tagline">The free Minecraft client for <span class="hl">every version</span>, from 1.8.9 to 26.3.<br>80 mods, a big FPS boost and a launcher that does everything for you.</p>
@@ -84,6 +90,14 @@
       <div class="marquee-row" id="marqueeA"></div>
       <div class="marquee-row reverse" id="marqueeB"></div>
     </div>
+
+    <!-- ================= stats ================= -->
+    <section class="stats" aria-label="Eclipse in numbers">
+      <div class="stat reveal"><b data-to="80">0</b><span>built-in mods</span></div>
+      <div class="stat reveal"><b data-to="3" data-suffix="×">0</b><span>the FPS behind walls</span></div>
+      <div class="stat reveal"><b data-to="4">0</b><span>loaders: Vanilla, Fabric, Forge, NeoForge</span></div>
+      <div class="stat reveal"><b data-to="11">0</b><span>years of versions, 1.8.9 to 26.3</span></div>
+    </section>
 
     <!-- ================= features (bento) ================= -->
     <section class="section" id="features">
@@ -167,6 +181,73 @@
           <div class="cmp-bar"><i style="--w: 100%"></i></div>
         </div>
         <p class="cmp-note">Works next to Sodium, Iris, Lithium, ImmediatelyFast and FerriteCore, and steps aside automatically if you use the EntityCulling mod.</p>
+      </div>
+    </section>
+
+    <!-- ================= timeline (pinned, scrolls sideways) ================= -->
+    <section class="timeline" id="timeline">
+      <div class="tl-sticky">
+        <div class="tl-head">
+          <p class="eyebrow scramble">// EVERY VERSION</p>
+          <h2>Eleven years of Minecraft</h2>
+        </div>
+        <div class="tl-track" id="tlTrack">
+          <article class="tl-card">
+            <span class="tl-year">2015</span>
+            <b class="tl-ver">1.8.9</b>
+            <h3>The PvP classic</h3>
+            <p>Still the home of competitive PvP. Keystrokes, CPS and Toggle Sprint feel right at home.</p>
+            <div class="tl-tags"><span>Fabric</span><span>Forge</span></div>
+          </article>
+          <article class="tl-card">
+            <span class="tl-year">2017</span>
+            <b class="tl-ver">1.12.2</b>
+            <h3>The modding era</h3>
+            <p>The version with more mods than any other, now with Eclipse on top.</p>
+            <div class="tl-tags"><span>Fabric</span><span>Forge</span></div>
+          </article>
+          <article class="tl-card">
+            <span class="tl-year">2021</span>
+            <b class="tl-ver">1.16.5</b>
+            <h3>Nether Update</h3>
+            <p>Netherite, bastions and the servers that never left.</p>
+            <div class="tl-tags"><span>Fabric</span></div>
+          </article>
+          <article class="tl-card">
+            <span class="tl-year">2022</span>
+            <b class="tl-ver">1.18.2</b>
+            <h3>Caves &amp; Cliffs</h3>
+            <p>Taller worlds and deeper caves, with culling to keep them smooth.</p>
+            <div class="tl-tags"><span>Fabric</span><span>Forge</span></div>
+          </article>
+          <article class="tl-card">
+            <span class="tl-year">2023</span>
+            <b class="tl-ver">1.20.1</b>
+            <h3>Trails &amp; Tales</h3>
+            <p>The big modpack version. Import a pack and press Play.</p>
+            <div class="tl-tags"><span>Fabric</span><span>Forge</span></div>
+          </article>
+          <article class="tl-card">
+            <span class="tl-year">2025</span>
+            <b class="tl-ver">1.21.11</b>
+            <h3>Mounts of Mayhem</h3>
+            <p>Spears, mounts and every modern Fabric and NeoForge mod.</p>
+            <div class="tl-tags"><span>Fabric</span><span>NeoForge</span></div>
+          </article>
+          <article class="tl-card">
+            <span class="tl-year">2026</span>
+            <b class="tl-ver">26.3</b>
+            <h3>The newest</h3>
+            <p>Year-numbered versions, supported on day one.</p>
+            <div class="tl-tags"><span>Fabric</span><span>NeoForge</span></div>
+          </article>
+          <article class="tl-card tl-more">
+            <b class="tl-ver">+ all of it</b>
+            <h3>And everything in between</h3>
+            <p>Every release, snapshot, beta and alpha runs in the launcher, with or without a loader.</p>
+          </article>
+        </div>
+        <div class="tl-line"><i id="tlFill"></i></div>
       </div>
     </section>
 
@@ -264,6 +345,6 @@
     <p class="legal">Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</p>
   </footer>
 
-  <script src="main.js?v=3"></script>
+  <script src="main.js?v=4"></script>
 </body>
 </html>
